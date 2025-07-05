@@ -29,6 +29,10 @@ function getLevelSeverity(level: string): "success" | "info" | "warning" | "dang
     default: return "info";
   }
 }
+
+function formatTimestamp(timestamp: string): string {
+  return new Date(timestamp).toLocaleString();
+}
 </script>
 
 <template>
@@ -47,7 +51,7 @@ function getLevelSeverity(level: string): "success" | "info" | "warning" | "dang
             <i class="pi pi-clock"></i>
             Timestamp
           </div>
-          <div class="property-value">{{ selectedEntry.timestamp }}</div>
+          <div class="property-value">{{ formatTimestamp(selectedEntry.timestamp) }}</div>
         </div>
         
         <div class="property-group">
@@ -63,21 +67,37 @@ function getLevelSeverity(level: string): "success" | "info" | "warning" | "dang
           </div>
         </div>
         
+        <div class="property-group">
+          <div class="property-title">
+            <i class="pi pi-comment"></i>
+            Message
+          </div>
+          <div class="property-value message-text"><pre>{{ selectedEntry.message }}</pre></div>
+        </div>
+        
+        <div class="property-group" v-if="selectedEntry.eventId">
+          <div class="property-title">
+            <i class="pi pi-key"></i>
+            Event ID
+          </div>
+          <div class="property-value">{{ selectedEntry.eventId }}</div>
+        </div>
+        
         <div class="property-group" v-if="selectedEntry.template">
           <div class="property-title">
             <i class="pi pi-file-edit"></i>
             Message Template
           </div>
-          <div class="property-value template-text">{{ selectedEntry.template }}</div>
+          <div class="property-value template-text"><pre>{{ selectedEntry.template }}</pre></div>
         </div>
         
-        <div class="property-group" v-if="selectedEntry.properties">
+        <div class="property-group" v-if="selectedEntry.properties ">
           <div class="property-title">
             <i class="pi pi-cog"></i>
             Properties
           </div>
           <div class="property-value json-text">
-            {{ JSON.stringify(selectedEntry.properties, null, 2) }}
+            <pre>{{ JSON.stringify(selectedEntry.properties, null, 2) }}</pre>
           </div>
         </div>
         
@@ -86,7 +106,7 @@ function getLevelSeverity(level: string): "success" | "info" | "warning" | "dang
             <i class="pi pi-exclamation-triangle"></i>
             Exception
           </div>
-          <div class="property-value exception-text">{{ selectedEntry.exception }}</div>
+          <div class="property-value exception-text"><pre>{{ selectedEntry.exception }}</pre></div>
         </div>
       </div>
       
@@ -166,13 +186,19 @@ function getLevelSeverity(level: string): "success" | "info" | "warning" | "dang
 .json-text {
   background: var(--p-surface-100);
   border-left: 4px solid var(--p-text-muted-color);
-  white-space: pre-wrap;
 }
 
 .exception-text {
   background: var(--p-red-50);
   border-left: 4px solid var(--p-red-500);
+}
+
+.exception-text pre {
+  margin: 0;
+  font-family: inherit;
+  font-size: inherit;
   white-space: pre-wrap;
+  word-break: break-word;
 }
 
 .no-selection {

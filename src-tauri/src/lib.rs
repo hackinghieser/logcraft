@@ -19,31 +19,47 @@ pub struct SerializableEvent {
 }
 
 // Convert from cleverlib's Event to our serializable version
-impl From<&Event> for SerializableEvent {
-    fn from(event: &Event) -> Self {
-        // Use the rendered message if available, otherwise use template
+impl From<(&Event, &str)> for SerializableEvent {
+    fn from((event, raw_event_str): (&Event, &str)) -> Self {
         let message = if let Some(msg) = &event.message {
             msg.clone()
         } else {
             event.template.clone()
         };
 
-        // Parse template to extract properties (simple approach)
-        let properties = if !event.template.is_empty() {
-            // This is a simplified approach - in a real implementation, 
-            // you might want to parse the original JSON to extract all properties
-            Some(serde_json::json!({}))
-        } else {
-            None
+               let properties: Option<serde_json::Value> = {
+            if raw_event_str.is_empty() {
+                None
+            } else {
+                match serde_json::from_str::<serde_json::Value>(raw_event_str) {
+                    Ok(serde_json::Value::Object(mut map)) => {
+                        // Remove standard CLEF properties to keep only custom ones
+                        map.remove("@t");
+                        map.remove("@mt");
+                        map.remove("@m");
+                        map.remove("@l");
+                        map.remove("@x");
+                        map.remove("@i");
+                        map.remove("@r");
+
+                        if map.is_empty() {
+                            None
+                        } else {
+                            Some(serde_json::Value::Object(map))
+                        }
+                    },
+                    _ => None, // Not a JSON object or parsing failed
+                }
+            }
         };
 
         SerializableEvent {
             timestamp: event.time.clone().unwrap_or_else(|| "Unknown".to_string()),
             level: event.level.clone().unwrap_or_else(|| "Information".to_string()),
-            template: if event.template != message && !event.template.is_empty() { 
-                Some(event.template.clone()) 
-            } else { 
-                None 
+            template: if event.template != message && !event.template.is_empty() {
+                Some(event.template.clone())
+            } else {
+                None
             },
             message,
             exception: event.exception.clone(),
@@ -92,7 +108,8 @@ fn test_cleverlib_parsing() -> Result<Vec<SerializableEvent>, String> {
         Ok(collection) => {
             let serializable_events: Vec<SerializableEvent> = collection.events
                 .iter()
-                .map(|event| SerializableEvent::from(event))
+                .zip(test_entries.iter()) // Pair events with their original raw strings
+            .map(|(event, raw_event_str)| SerializableEvent::from((event, raw_event_str.as_str())))
                 .collect();
             Ok(serializable_events)
         }
@@ -197,7 +214,8 @@ async fn parse_clef_file(file_path: String) -> Result<(LogFileInfo, Vec<Serializ
     // Convert events to serializable format
     let serializable_events: Vec<SerializableEvent> = collection.events
         .iter()
-        .map(|event| SerializableEvent::from(event))
+        .zip(lines.iter()) // Pair events with their original raw strings
+        .map(|(event, raw_event_str)| SerializableEvent::from((event, raw_event_str.as_str())))
         .collect();
 
     // Extract unique log levels
