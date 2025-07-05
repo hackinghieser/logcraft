@@ -197,7 +197,6 @@ watch([selectedLevels, searchText, dateRange], () => {
 /* Make clear filter button smaller and square */
 .filter-group:last-child .filter-control {
   width: 32px;
-  align-self: flex-end;
 }
 
 .filter-group:last-child .filter-control :deep(.p-button) {

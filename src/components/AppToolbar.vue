@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { invoke } from "@tauri-apps/api/core";
+
 import Toolbar from "primevue/toolbar";
 import Button from "primevue/button";
 
@@ -18,7 +18,6 @@ defineProps<Props>();
 
 const emit = defineEmits<{
   openFile: [];
-  toggleTheme: [];
   openSettings: [];
 }>();
 
@@ -26,29 +25,20 @@ async function openFile() {
   emit('openFile');
 }
 
-function toggleTheme() {
-  emit('toggleTheme');
-}
+
 
 function openSettings() {
   emit('openSettings');
 }
 
-async function testCleverlib() {
-  try {
-    const result = await invoke("test_cleverlib_parsing");
-    console.log("Cleverlib test result:", result);
-  } catch (error) {
-    console.error("Cleverlib test error:", error);
-  }
-}
+
 </script>
 
 <template>
   <Toolbar class="app-toolbar">
     <template #start>
       <div class="toolbar-left">
-        <h1 class="app-title">CLEF Log Viewer</h1>
+        <h1 class="app-title">LogCraft</h1>
         <div class="file-info" v-if="logFile">
           <i class="pi pi-file"></i>
           {{ logFile.path }} • {{ logFile.totalCount.toLocaleString() }} entries
@@ -59,9 +49,9 @@ async function testCleverlib() {
     <template #end>
       <div class="toolbar-right">
         <Button icon="pi pi-folder-open" label="Open File" @click="openFile" size="small" />
-        <Button icon="pi pi-moon" label="Theme" text @click="toggleTheme" size="small" />
+        
         <Button icon="pi pi-cog" label="Settings" text @click="openSettings" size="small" />
-        <Button icon="pi pi-code" label="Test Cleverlib" @click="testCleverlib" outlined size="small" />
+        
       </div>
     </template>
   </Toolbar>
