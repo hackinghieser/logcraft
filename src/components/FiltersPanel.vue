@@ -4,7 +4,6 @@ import Button from "primevue/button";
 import InputText from "primevue/inputtext";
 import MultiSelect from "primevue/multiselect";
 import Calendar from "primevue/calendar";
-import Card from "primevue/card";
 
 interface Props {
   logLevels?: string[];
@@ -51,60 +50,59 @@ watch([selectedLevels, searchText, dateRange], () => {
 </script>
 
 <template>
-  <Card class="filters-panel">
-    <template #content>
-      <div class="filters-grid">
-        <div class="filter-group">
-          <label>Log Level</label>
-          <MultiSelect
-            v-model="selectedLevels"
-            :options="logLevels"
-            placeholder="All Levels"
-            class="filter-control"
-          />
-        </div>
-        
-        <div class="filter-group">
-          <label>Search Text</label>
-          <InputText
-            v-model="searchText"
-            placeholder="Search messages..."
-            class="filter-control"
-          />
-        </div>
-        
-        <div class="filter-group">
-          <label>Date Range</label>
-          <Calendar
-            v-model="dateRange"
-            selectionMode="range"
-            :showIcon="true"
-            dateFormat="yy-mm-dd"
-            class="filter-control"
-          />
-        </div>
-        
-        <div class="filter-group">
-          <label>Actions</label>
-          <Button
-            icon="pi pi-times"
-            @click="clearFilters"
-            outlined
-            class="filter-control"
-            v-tooltip.top="'Clear all filters'"
-            aria-label="Clear all filters"
-          />
-        </div>
+  <div class="filters-panel">
+    <div class="filters-grid">
+      <div class="filter-group">
+        <label>Log Level</label>
+        <MultiSelect
+          v-model="selectedLevels"
+          :options="logLevels"
+          placeholder="All Levels"
+          class="filter-control"
+        />
       </div>
-    </template>
-  </Card>
+      
+      <div class="filter-group">
+        <label>Search Text</label>
+        <InputText
+          v-model="searchText"
+          placeholder="Search messages..."
+          class="filter-control"
+        />
+      </div>
+      
+      <div class="filter-group">
+        <label>Date Range</label>
+        <Calendar
+          v-model="dateRange"
+          selectionMode="range"
+          :showIcon="true"
+          dateFormat="yy-mm-dd"
+          class="filter-control"
+        />
+      </div>
+      
+      <div class="filter-group">
+        <label>Actions</label>
+        <Button
+          icon="pi pi-times"
+          @click="clearFilters"
+          outlined
+          class="filter-control"
+          v-tooltip.top="'Clear all filters'"
+          aria-label="Clear all filters"
+        />
+      </div>
+    </div>
+  </div>
 </template>
 
 <style scoped>
 .filters-panel {
-  border-radius: 6px;
   background: var(--p-surface-card);
   border: 1px solid var(--p-surface-border);
+  border-radius: 6px;
+  padding: 16px;
 }
 
 .filters-grid {

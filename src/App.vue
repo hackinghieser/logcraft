@@ -269,11 +269,18 @@ onUnmounted(() => {
 html, body {
   height: 100%;
   overflow: hidden;
+  font-family: system-ui, -apple-system, sans-serif;
 }
 
 #app {
   height: 100vh;
   overflow: hidden;
+  font-family: system-ui, -apple-system, sans-serif;
+}
+
+/* Ensure all PrimeVue components use system fonts */
+.p-component {
+  font-family: inherit !important;
 }
 
 /* Global styles for PrimeVue components */
@@ -369,6 +376,7 @@ body.splitter-dragging .p-splitter-gutter {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  vertical-align: middle;
 }
 
 .p-datatable .p-datatable-tbody > tr td:first-child {
@@ -419,5 +427,9 @@ body.splitter-dragging .p-splitter-gutter {
 
 .p-tag {
   border-radius: 12px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  vertical-align: middle;
 }
 </style>

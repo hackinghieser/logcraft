@@ -140,7 +140,6 @@ function getLevelSeverity(level: string): "success" | "info" | "warning" | "dang
 }
 
 .timestamp {
-  font-family: 'Courier New', monospace;
   font-size: 12px;
   color: var(--p-text-muted-color);
 }
@@ -148,6 +147,9 @@ function getLevelSeverity(level: string): "success" | "info" | "warning" | "dang
 .level-tag {
   font-size: 11px;
   font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  vertical-align: middle;
 }
 
 .message-text {

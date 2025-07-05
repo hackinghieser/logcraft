@@ -58,10 +58,10 @@ async function testCleverlib() {
     
     <template #end>
       <div class="toolbar-right">
-        <Button icon="pi pi-folder-open" label="Open File" @click="openFile" />
-        <Button icon="pi pi-moon" label="Theme" text @click="toggleTheme" />
-        <Button icon="pi pi-cog" label="Settings" text @click="openSettings" />
-        <Button icon="pi pi-code" label="Test Cleverlib" @click="testCleverlib" outlined />
+        <Button icon="pi pi-folder-open" label="Open File" @click="openFile" size="small" />
+        <Button icon="pi pi-moon" label="Theme" text @click="toggleTheme" size="small" />
+        <Button icon="pi pi-cog" label="Settings" text @click="openSettings" size="small" />
+        <Button icon="pi pi-code" label="Test Cleverlib" @click="testCleverlib" outlined size="small" />
       </div>
     </template>
   </Toolbar>
@@ -69,9 +69,8 @@ async function testCleverlib() {
 
 <style scoped>
 .app-toolbar {
-  background: var(--p-surface-card);
-  border: 1px solid var(--p-surface-border);
-  border-radius: 6px;
+  background: transparent;
+  border: none;
   padding: 8px 16px;
   min-height: 48px;
 }

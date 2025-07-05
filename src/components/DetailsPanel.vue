@@ -159,20 +159,17 @@ function getLevelSeverity(level: string): "success" | "info" | "warning" | "dang
 }
 
 .template-text {
-  font-family: 'Courier New', monospace;
   background: var(--p-primary-50);
   border-left: 4px solid var(--p-primary-color);
 }
 
 .json-text {
-  font-family: 'Courier New', monospace;
   background: var(--p-surface-100);
   border-left: 4px solid var(--p-text-muted-color);
   white-space: pre-wrap;
 }
 
 .exception-text {
-  font-family: 'Courier New', monospace;
   background: var(--p-red-50);
   border-left: 4px solid var(--p-red-500);
   white-space: pre-wrap;
