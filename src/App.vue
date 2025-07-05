@@ -87,9 +87,57 @@ logFile.value = {
 };
 
 // Event handlers
-function handleOpenFile() {
-  // TODO: Implement file opening with Tauri
-  console.log("Opening file...");
+async function handleOpenFile() {
+  try {
+    // Import Tauri APIs
+    const { open } = await import('@tauri-apps/plugin-dialog');
+    const { invoke } = await import('@tauri-apps/api/core');
+    
+    // Open file dialog
+    const selected = await open({
+      filters: [
+        {
+          name: 'CLEF Log Files',
+          extensions: ['clef', 'log', 'txt']
+        },
+        {
+          name: 'All Files',
+          extensions: ['*']
+        }
+      ]
+    });
+
+    if (selected) {
+      loading.value = true;
+      try {
+        // Parse the selected file
+        const result = await invoke('parse_clef_file', { filePath: selected }) as [any, LogEntry[]];
+        const [fileInfo, events] = result;
+        
+        // Update the application state
+        logFile.value = {
+          path: fileInfo.path,
+          totalCount: fileInfo.total_count,
+          logLevels: fileInfo.log_levels,
+          dateRange: fileInfo.date_range
+        };
+        
+        logEntries.value = events;
+        filteredEntries.value = [...events];
+        selectedEntry.value = events.length > 0 ? events[0] : null;
+        
+        console.log(`Loaded ${events.length} log entries from ${fileInfo.path}`);
+      } catch (error) {
+        console.error('Failed to parse log file:', error);
+        alert(`Failed to parse log file: ${error}`);
+      } finally {
+        loading.value = false;
+      }
+    }
+  } catch (error) {
+    console.error('Failed to open file dialog:', error);
+    alert(`Failed to open file dialog: ${error}`);
+  }
 }
 
 function handleToggleTheme() {
@@ -350,8 +398,9 @@ body.splitter-dragging .p-splitter-gutter {
 
 .p-datatable .p-datatable-wrapper {
   flex: 1;
-  overflow: auto;
-  height: 100%;
+  overflow-y: auto;
+  overflow-x: hidden;
+  min-height: 0;
 }
 
 .p-datatable .p-datatable-table {

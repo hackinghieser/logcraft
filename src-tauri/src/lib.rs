@@ -2,30 +2,53 @@ use serde::{Deserialize, Serialize};
 use cleverlib::event_collection::EventCollection;
 use cleverlib::clever_parser_options::CleverParserOptions;
 use cleverlib::event::Event;
+use std::fs;
+use std::path::Path;
 
 // Wrapper struct for Tauri IPC (cleverlib's Event doesn't implement Serialize)
 #[derive(Serialize, Deserialize, Debug)]
 pub struct SerializableEvent {
-    pub time: Option<String>,
-    pub message: Option<String>,
-    pub template: String,
-    pub level: Option<String>,
+    pub timestamp: String,
+    pub level: String,
+    pub message: String,
+    pub template: Option<String>,
     pub exception: Option<String>,
-    pub eventid: Option<String>,
-    pub renderings: Vec<String>,
+    #[serde(rename = "eventId")]
+    pub event_id: Option<String>,
+    pub properties: Option<serde_json::Value>,
 }
 
 // Convert from cleverlib's Event to our serializable version
 impl From<&Event> for SerializableEvent {
     fn from(event: &Event) -> Self {
+        // Use the rendered message if available, otherwise use template
+        let message = if let Some(msg) = &event.message {
+            msg.clone()
+        } else {
+            event.template.clone()
+        };
+
+        // Parse template to extract properties (simple approach)
+        let properties = if !event.template.is_empty() {
+            // This is a simplified approach - in a real implementation, 
+            // you might want to parse the original JSON to extract all properties
+            Some(serde_json::json!({}))
+        } else {
+            None
+        };
+
         SerializableEvent {
-            time: event.time.clone(),
-            message: event.message.clone(),
-            template: event.template.clone(),
-            level: event.level.clone(),
+            timestamp: event.time.clone().unwrap_or_else(|| "Unknown".to_string()),
+            level: event.level.clone().unwrap_or_else(|| "Information".to_string()),
+            template: if event.template != message && !event.template.is_empty() { 
+                Some(event.template.clone()) 
+            } else { 
+                None 
+            },
+            message,
             exception: event.exception.clone(),
-            eventid: event.eventid.clone(),
-            renderings: event.renderings.clone(),
+            event_id: event.eventid.clone(),
+            properties,
         }
     }
 }
@@ -135,11 +158,89 @@ fn examine_cleverlib_event() -> String {
     }
 }
 
+// Parse CLEF file and return log data
+#[tauri::command]
+async fn parse_clef_file(file_path: String) -> Result<(LogFileInfo, Vec<SerializableEvent>), String> {
+    // Validate file exists and is accessible
+    if !Path::new(&file_path).exists() {
+        return Err(format!("File does not exist: {}", file_path));
+    }
+
+    // Read file content
+    let content = match fs::read_to_string(&file_path) {
+        Ok(content) => content,
+        Err(e) => return Err(format!("Failed to read file: {}", e)),
+    };
+
+    // Split into lines for CLEF parsing
+    let lines: Vec<String> = content
+        .lines()
+        .filter(|line| !line.trim().is_empty())
+        .map(|line| line.to_string())
+        .collect();
+
+    if lines.is_empty() {
+        return Err("File is empty or contains no valid log entries".to_string());
+    }
+
+    // Parse with cleverlib
+    let options = CleverParserOptions {
+        ignore_errors: Some(true),
+        debug: Some(false),
+    };
+
+    let collection = match EventCollection::create(&lines, Some(&options)) {
+        Ok(collection) => collection,
+        Err(e) => return Err(format!("Failed to parse CLEF file: {}", e)),
+    };
+
+    // Convert events to serializable format
+    let serializable_events: Vec<SerializableEvent> = collection.events
+        .iter()
+        .map(|event| SerializableEvent::from(event))
+        .collect();
+
+    // Extract unique log levels
+    let mut log_levels: Vec<String> = collection.log_levels.clone();
+    log_levels.sort();
+
+    // Find date range from events
+    let mut timestamps: Vec<&str> = collection.events
+        .iter()
+        .filter_map(|event| event.time.as_deref())
+        .collect();
+    timestamps.sort();
+
+    let date_range = if timestamps.len() >= 2 {
+        Some((timestamps[0].to_string(), timestamps[timestamps.len() - 1].to_string()))
+    } else if timestamps.len() == 1 {
+        Some((timestamps[0].to_string(), timestamps[0].to_string()))
+    } else {
+        None
+    };
+
+    let log_file_info = LogFileInfo {
+        path: file_path,
+        total_count: serializable_events.len(),
+        log_levels,
+        date_range,
+    };
+
+    Ok((log_file_info, serializable_events))
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
         .plugin(tauri_plugin_opener::init())
-        .invoke_handler(tauri::generate_handler![greet, examine_cleverlib_event, test_cleverlib_parsing])
+        .plugin(tauri_plugin_dialog::init())
+        .plugin(tauri_plugin_fs::init())
+        .invoke_handler(tauri::generate_handler![
+            greet, 
+            examine_cleverlib_event, 
+            test_cleverlib_parsing,
+            parse_clef_file
+        ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }

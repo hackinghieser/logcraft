@@ -123,6 +123,8 @@ function getLevelSeverity(level: string): "success" | "info" | "warning" | "dang
   flex: 1;
   display: flex;
   flex-direction: column;
+  overflow: hidden;
+  min-height: 0;
 }
 
 .table-header {
@@ -137,6 +139,7 @@ function getLevelSeverity(level: string): "success" | "info" | "warning" | "dang
 
 .logs-table {
   flex: 1;
+  min-height: 0;
 }
 
 .timestamp {
