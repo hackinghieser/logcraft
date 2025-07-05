@@ -129,6 +129,7 @@ async function loadMoreEntries() {
   }
 
   loadingMore.value = true;
+  const currentLogFile = logFile.value; // Store reference to avoid null check issues
   
   // Load in background without blocking UI
   setTimeout(async () => {
@@ -137,7 +138,7 @@ async function loadMoreEntries() {
       
       const nextPage = currentPage.value + 1;
       const moreEntries = await invoke('load_log_entries_page', { 
-        filePath: logFile.value.path, 
+        filePath: currentLogFile.path, 
         page: nextPage 
       }) as LogEntry[];
       
@@ -147,7 +148,7 @@ async function loadMoreEntries() {
         currentPage.value = nextPage;
         
         // Check if we've loaded all entries
-        if (logEntries.value.length >= logFile.value.totalCount) {
+        if (logEntries.value.length >= currentLogFile.totalCount) {
           hasMorePages.value = false;
         }
       } else {
