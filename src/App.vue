@@ -40,12 +40,14 @@ const loading = ref(false);
 
 
 
+// Drag and drop state
+const isDragOver = ref(false);
+
 // Event handlers
 async function handleOpenFile() {
   try {
     // Import Tauri APIs
     const { open } = await import('@tauri-apps/plugin-dialog');
-    const { invoke } = await import('@tauri-apps/api/core');
     
     // Open file dialog
     const selected = await open({
@@ -62,35 +64,88 @@ async function handleOpenFile() {
     });
 
     if (selected) {
-      loading.value = true;
-      try {
-        // Parse the selected file
-        const result = await invoke('parse_clef_file', { filePath: selected }) as [any, LogEntry[]];
-        const [fileInfo, events] = result;
-        
-        // Update the application state
-        logFile.value = {
-          path: fileInfo.path,
-          totalCount: fileInfo.total_count,
-          logLevels: fileInfo.log_levels,
-          dateRange: fileInfo.date_range
-        };
-        
-        logEntries.value = events;
-        filteredEntries.value = [...events];
-        selectedEntry.value = events.length > 0 ? events[0] : null;
-        
-        console.log(`Loaded ${events.length} log entries from ${fileInfo.path}`);
-      } catch (error) {
-        console.error('Failed to parse log file:', error);
-        alert(`Failed to parse log file: ${error}`);
-      } finally {
-        loading.value = false;
-      }
+      await handleFileOpen(selected);
     }
   } catch (error) {
     console.error('Failed to open file dialog:', error);
     alert(`Failed to open file dialog: ${error}`);
+  }
+}
+
+// Tauri file drop handlers using 2.0 API
+async function setupFileDropListener() {
+  try {
+    const { getCurrentWebview } = await import('@tauri-apps/api/webview');
+    
+    // Set up drag and drop event listener
+    const unlisten = await getCurrentWebview().onDragDropEvent((event: any) => {
+      switch (event.payload.type) {
+        case 'over':
+          isDragOver.value = true;
+          break;
+        case 'drop':
+          isDragOver.value = false;
+          if (event.payload.paths && event.payload.paths.length > 0) {
+            handleFileDropped(event.payload.paths[0]);
+          }
+          break;
+        case 'cancel':
+          isDragOver.value = false;
+          break;
+      }
+    });
+    
+    // Return cleanup function
+    return unlisten;
+  } catch (error) {
+    console.error('Failed to setup file drop listener:', error);
+    return () => {};
+  }
+}
+
+async function handleFileDropped(filePath: string) {
+  isDragOver.value = false;
+  
+  // Check if file is a log file
+  const validExtensions = ['clef', 'log', 'txt'];
+  const fileExtension = filePath.split('.').pop()?.toLowerCase();
+  
+  if (fileExtension && validExtensions.includes(fileExtension)) {
+    await handleFileOpen(filePath);
+  } else {
+    alert('Please drop a valid log file (.clef, .log, or .txt)');
+  }
+}
+
+// Extract file opening logic to reuse for both dialog and drag & drop
+async function handleFileOpen(filePath: string) {
+  loading.value = true;
+  try {
+    // Import Tauri APIs
+    const { invoke } = await import('@tauri-apps/api/core');
+    
+    // Parse the selected file
+    const result = await invoke('parse_clef_file', { filePath }) as [any, LogEntry[]];
+    const [fileInfo, events] = result;
+    
+    // Update the application state
+    logFile.value = {
+      path: fileInfo.path,
+      totalCount: fileInfo.total_count,
+      logLevels: fileInfo.log_levels,
+      dateRange: fileInfo.date_range
+    };
+    
+    logEntries.value = events;
+    filteredEntries.value = [...events];
+    selectedEntry.value = events.length > 0 ? events[0] : null;
+    
+    console.log(`Loaded ${events.length} log entries from ${fileInfo.path}`);
+  } catch (error) {
+    console.error('Failed to parse log file:', error);
+    alert(`Failed to parse log file: ${error}`);
+  } finally {
+    loading.value = false;
   }
 }
 
@@ -140,10 +195,6 @@ function handleUpdateFilters(filters: { selectedLevels: string[]; searchText: st
   }
 }
 
-function handleClearFilters() {
-  filteredEntries.value = [...logEntries.value];
-  selectedEntry.value = logEntries.value.length > 0 ? logEntries.value[0] : null;
-}
 
 function handleEntrySelect(entry: LogEntry) {
   selectedEntry.value = entry;
@@ -162,7 +213,10 @@ function handleSplitterEnd() {
   document.body.classList.remove('splitter-dragging');
 }
 
-onMounted(() => {
+onMounted(async () => {
+  // Setup file drop listener
+  const cleanupFileDropListener = await setupFileDropListener();
+  
   // Add global event listeners for splitter events
   document.addEventListener('mousedown', (e) => {
     if ((e.target as HTMLElement)?.closest('.p-splitter-gutter')) {
@@ -188,15 +242,26 @@ onMounted(() => {
       handleSplitterEnd();
     }
   });
+  
+  // Store cleanup function for unmount
+  (window as any)._cleanupFileDropListener = cleanupFileDropListener;
 });
 
 onUnmounted(() => {
   document.body.classList.remove('splitter-dragging');
+  
+  // Cleanup file drop listener
+  if ((window as any)._cleanupFileDropListener) {
+    (window as any)._cleanupFileDropListener();
+  }
 });
 </script>
 
 <template>
-  <div class="app-container">
+  <div 
+    class="app-container"
+    :class="{ 'drag-over': isDragOver }"
+  >
     <!-- Toolbar -->
     <AppToolbar 
       :logFile="logFile"
@@ -209,7 +274,6 @@ onUnmounted(() => {
     <FiltersPanel 
       :logLevels="logFile?.logLevels || []"
       @updateFilters="handleUpdateFilters"
-      @clearFilters="handleClearFilters"
     />
 
     <!-- Main Content -->
@@ -252,6 +316,30 @@ onUnmounted(() => {
   background: var(--p-surface-ground);
   overflow: hidden;
   box-sizing: border-box;
+  position: relative;
+  transition: all 0.2s ease;
+}
+
+.app-container.drag-over {
+  background: var(--p-primary-50);
+  border: 2px dashed var(--p-primary-500);
+}
+
+.app-container.drag-over::after {
+  content: "Drop log files here to open them";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--p-primary-500);
+  background: var(--p-surface-0);
+  padding: 2rem;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  z-index: 1000;
+  pointer-events: none;
 }
 
 .main-content {

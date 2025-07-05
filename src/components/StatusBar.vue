@@ -44,20 +44,12 @@ function getSelectedEntryIndex(): number {
         <i class="pi pi-search"></i>
         {{ logEntries.length }} filtered
       </span>
-      <span>
-        <i class="pi pi-bolt"></i>
-        Ready
-      </span>
     </div>
     
     <div class="status-right">
       <span v-if="selectedEntry">
         <i class="pi pi-map-marker"></i>
         Entry {{ getSelectedEntryIndex() + 1 }} of {{ logEntries.length }}
-      </span>
-      <span v-if="logFile">
-        <i class="pi pi-refresh"></i>
-        Loaded
       </span>
     </div>
   </div>

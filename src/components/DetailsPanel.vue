@@ -132,6 +132,8 @@ function formatTimestamp(timestamp: string): string {
   flex: 1;
   display: flex;
   flex-direction: column;
+  min-height: 0;
+  overflow: hidden;
 }
 
 .panel-header {
@@ -151,6 +153,7 @@ function formatTimestamp(timestamp: string): string {
   overflow-y: auto;
   flex: 1;
   padding: 16px;
+  min-height: 0;
 }
 
 .property-group {
@@ -206,6 +209,11 @@ function formatTimestamp(timestamp: string): string {
   text-align: center;
   color: var(--p-text-muted-color);
   padding: 40px 16px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
 }
 
 .no-selection i {

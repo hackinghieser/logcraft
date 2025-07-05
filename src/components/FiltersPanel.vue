@@ -19,7 +19,6 @@ const emit = defineEmits<{
     searchText: string;
     dateRange: Date[];
   }];
-  clearFilters: [];
 }>();
 
 const selectedLevels = ref<string[]>([]);
@@ -30,7 +29,6 @@ function clearFilters() {
   selectedLevels.value = [];
   searchText.value = "";
   dateRange.value = [];
-  emit('clearFilters');
   emitFilters();
 }
 
