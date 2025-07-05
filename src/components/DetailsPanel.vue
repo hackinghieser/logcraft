@@ -1,0 +1,181 @@
+<script setup lang="ts">
+import Card from "primevue/card";
+import Tag from "primevue/tag";
+
+interface LogEntry {
+  timestamp: string;
+  level: string;
+  message: string;
+  template?: string;
+  exception?: string;
+  eventId?: string;
+  properties?: Record<string, any>;
+}
+
+interface Props {
+  selectedEntry?: LogEntry | null;
+}
+
+withDefaults(defineProps<Props>(), {
+  selectedEntry: null
+});
+
+function getLevelSeverity(level: string): "success" | "info" | "warning" | "danger" {
+  switch (level.toLowerCase()) {
+    case "error": return "danger";
+    case "warning": return "warning";
+    case "information": return "info";
+    case "debug": return "success";
+    default: return "info";
+  }
+}
+</script>
+
+<template>
+  <Card class="details-panel-card">
+    <template #title>
+      <div class="panel-header">
+        <i class="pi pi-info-circle"></i>
+        Entry Details
+      </div>
+    </template>
+    
+    <template #content>
+      <div v-if="selectedEntry" class="details-content">
+        <div class="property-group">
+          <div class="property-title">
+            <i class="pi pi-clock"></i>
+            Timestamp
+          </div>
+          <div class="property-value">{{ selectedEntry.timestamp }}</div>
+        </div>
+        
+        <div class="property-group">
+          <div class="property-title">
+            <i class="pi pi-tag"></i>
+            Level
+          </div>
+          <div class="property-value">
+            <Tag
+              :value="selectedEntry.level"
+              :severity="getLevelSeverity(selectedEntry.level)"
+            />
+          </div>
+        </div>
+        
+        <div class="property-group" v-if="selectedEntry.template">
+          <div class="property-title">
+            <i class="pi pi-file-edit"></i>
+            Message Template
+          </div>
+          <div class="property-value template-text">{{ selectedEntry.template }}</div>
+        </div>
+        
+        <div class="property-group" v-if="selectedEntry.properties">
+          <div class="property-title">
+            <i class="pi pi-cog"></i>
+            Properties
+          </div>
+          <div class="property-value json-text">
+            {{ JSON.stringify(selectedEntry.properties, null, 2) }}
+          </div>
+        </div>
+        
+        <div class="property-group" v-if="selectedEntry.exception">
+          <div class="property-title">
+            <i class="pi pi-exclamation-triangle"></i>
+            Exception
+          </div>
+          <div class="property-value exception-text">{{ selectedEntry.exception }}</div>
+        </div>
+      </div>
+      
+      <div v-else class="no-selection">
+        <i class="pi pi-info-circle"></i>
+        <p>Select a log entry to view details</p>
+      </div>
+    </template>
+  </Card>
+</template>
+
+<style scoped>
+.details-panel-card {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.panel-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+  color: var(--p-text-color);
+}
+
+.details-content {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  overflow-y: auto;
+  flex: 1;
+}
+
+.property-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.property-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+  color: var(--p-text-color);
+  font-size: 14px;
+}
+
+.property-value {
+  background: var(--p-surface-50);
+  border: 1px solid var(--p-surface-border);
+  padding: 12px;
+  border-radius: 6px;
+  font-size: 13px;
+  word-break: break-word;
+  color: var(--p-text-color);
+}
+
+.template-text {
+  font-family: 'Courier New', monospace;
+  background: var(--p-primary-50);
+  border-left: 4px solid var(--p-primary-color);
+}
+
+.json-text {
+  font-family: 'Courier New', monospace;
+  background: var(--p-surface-100);
+  border-left: 4px solid var(--p-text-muted-color);
+  white-space: pre-wrap;
+}
+
+.exception-text {
+  font-family: 'Courier New', monospace;
+  background: var(--p-red-50);
+  border-left: 4px solid var(--p-red-500);
+  white-space: pre-wrap;
+}
+
+.no-selection {
+  text-align: center;
+  color: var(--p-text-muted-color);
+  padding: 40px 20px;
+}
+
+.no-selection i {
+  font-size: 48px;
+  margin-bottom: 16px;
+  opacity: 0.5;
+}
+</style>

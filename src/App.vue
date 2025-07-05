@@ -1,19 +1,14 @@
 <script setup lang="ts">
-import { ref } from "vue";
-import { invoke } from "@tauri-apps/api/core";
-
-// Components
-import Toolbar from "primevue/toolbar";
-import Button from "primevue/button";
-import InputText from "primevue/inputtext";
-import MultiSelect from "primevue/multiselect";
-import Calendar from "primevue/calendar";
-import DataTable from "primevue/datatable";
-import Column from "primevue/column";
+import { ref, onMounted, onUnmounted } from "vue";
 import Splitter from "primevue/splitter";
 import SplitterPanel from "primevue/splitterpanel";
-import Card from "primevue/card";
-import Tag from "primevue/tag";
+
+// Components
+import AppToolbar from "./components/AppToolbar.vue";
+import FiltersPanel from "./components/FiltersPanel.vue";
+import LogTable from "./components/LogTable.vue";
+import DetailsPanel from "./components/DetailsPanel.vue";
+import StatusBar from "./components/StatusBar.vue";
 
 // Types
 interface LogEntry {
@@ -36,10 +31,8 @@ interface LogFileInfo {
 // Reactive data
 const logFile = ref<LogFileInfo | null>(null);
 const logEntries = ref<LogEntry[]>([]);
+const filteredEntries = ref<LogEntry[]>([]);
 const selectedEntry = ref<LogEntry | null>(null);
-const selectedLevels = ref<string[]>([]);
-const searchText = ref("");
-const dateRange = ref<Date[]>([]);
 const loading = ref(false);
 
 // Sample data for development
@@ -84,6 +77,7 @@ const sampleEntries: LogEntry[] = [
 
 // Initialize with sample data
 logEntries.value = sampleEntries;
+filteredEntries.value = [...sampleEntries];
 selectedEntry.value = sampleEntries[0];
 logFile.value = {
   path: "events.clef",
@@ -92,280 +86,156 @@ logFile.value = {
   dateRange: ["2024-01-15T10:30:00.000Z", "2024-01-15T10:35:00.000Z"]
 };
 
-// Methods
-async function openFile() {
+// Event handlers
+function handleOpenFile() {
   // TODO: Implement file opening with Tauri
   console.log("Opening file...");
 }
 
-function onRowSelect(event: any) {
-  selectedEntry.value = event.data;
+function handleToggleTheme() {
+  // TODO: Implement theme toggle
+  console.log("Toggle theme...");
 }
 
-function clearFilters() {
-  selectedLevels.value = [];
-  searchText.value = "";
-  dateRange.value = [];
+function handleOpenSettings() {
+  // TODO: Implement settings dialog
+  console.log("Open settings...");
 }
 
-function formatTimestamp(timestamp: string): string {
-  return new Date(timestamp).toLocaleString();
-}
-
-function getLevelSeverity(level: string): "success" | "info" | "warning" | "danger" {
-  switch (level.toLowerCase()) {
-    case "error": return "danger";
-    case "warning": return "warning";
-    case "information": return "info";
-    case "debug": return "success";
-    default: return "info";
+function handleUpdateFilters(filters: { selectedLevels: string[]; searchText: string; dateRange: Date[] }) {
+  // Apply filters to logEntries
+  let filtered = [...logEntries.value];
+  
+  // Filter by log levels
+  if (filters.selectedLevels.length > 0) {
+    filtered = filtered.filter(entry => filters.selectedLevels.includes(entry.level));
+  }
+  
+  // Filter by search text
+  if (filters.searchText.trim()) {
+    const searchTerm = filters.searchText.toLowerCase();
+    filtered = filtered.filter(entry => 
+      entry.message.toLowerCase().includes(searchTerm) ||
+      entry.template?.toLowerCase().includes(searchTerm) ||
+      entry.level.toLowerCase().includes(searchTerm)
+    );
+  }
+  
+  // Filter by date range
+  if (filters.dateRange.length === 2) {
+    const [startDate, endDate] = filters.dateRange;
+    filtered = filtered.filter(entry => {
+      const entryDate = new Date(entry.timestamp);
+      return entryDate >= startDate && entryDate <= endDate;
+    });
+  }
+  
+  filteredEntries.value = filtered;
+  
+  // Reset selection if current selection is not in filtered results
+  if (selectedEntry.value && !filtered.includes(selectedEntry.value)) {
+    selectedEntry.value = filtered.length > 0 ? filtered[0] : null;
   }
 }
 
-async function testCleverlib() {
-  try {
-    const result = await invoke("test_cleverlib_parsing");
-    console.log("Cleverlib test result:", result);
-  } catch (error) {
-    console.error("Cleverlib test error:", error);
-  }
+function handleClearFilters() {
+  filteredEntries.value = [...logEntries.value];
+  selectedEntry.value = logEntries.value.length > 0 ? logEntries.value[0] : null;
 }
+
+function handleEntrySelect(entry: LogEntry) {
+  selectedEntry.value = entry;
+}
+
+// Handle splitter drag to prevent text selection
+let isDraggingSplitter = false;
+
+function handleSplitterStart() {
+  isDraggingSplitter = true;
+  document.body.classList.add('splitter-dragging');
+}
+
+function handleSplitterEnd() {
+  isDraggingSplitter = false;
+  document.body.classList.remove('splitter-dragging');
+}
+
+onMounted(() => {
+  // Add global event listeners for splitter events
+  document.addEventListener('mousedown', (e) => {
+    if ((e.target as HTMLElement)?.closest('.p-splitter-gutter')) {
+      handleSplitterStart();
+    }
+  });
+  
+  document.addEventListener('mouseup', () => {
+    if (isDraggingSplitter) {
+      handleSplitterEnd();
+    }
+  });
+  
+  document.addEventListener('mouseleave', () => {
+    if (isDraggingSplitter) {
+      handleSplitterEnd();
+    }
+  });
+  
+  // Additional safety: clear on any click outside splitter
+  document.addEventListener('click', (e) => {
+    if (!(e.target as HTMLElement)?.closest('.p-splitter-gutter')) {
+      handleSplitterEnd();
+    }
+  });
+});
+
+onUnmounted(() => {
+  document.body.classList.remove('splitter-dragging');
+});
 </script>
 
 <template>
   <div class="app-container">
     <!-- Toolbar -->
-    <Toolbar class="app-toolbar">
-      <template #start>
-        <div class="toolbar-left">
-          <h1 class="app-title">CLEF Log Viewer</h1>
-          <div class="file-info" v-if="logFile">
-            <i class="pi pi-file"></i>
-            {{ logFile.path }} • {{ logFile.totalCount.toLocaleString() }} entries
-          </div>
-        </div>
-      </template>
-      
-      <template #end>
-        <div class="toolbar-right">
-          <Button icon="pi pi-folder-open" label="Open File" @click="openFile" />
-          <Button icon="pi pi-moon" label="Theme" text />
-          <Button icon="pi pi-cog" label="Settings" text />
-          <Button icon="pi pi-code" label="Test Cleverlib" @click="testCleverlib" outlined />
-        </div>
-      </template>
-    </Toolbar>
+    <AppToolbar 
+      :logFile="logFile"
+      @openFile="handleOpenFile"
+      @toggleTheme="handleToggleTheme"
+      @openSettings="handleOpenSettings"
+    />
 
     <!-- Filters Panel -->
-    <Card class="filters-panel">
-      <template #content>
-        <div class="filters-grid">
-          <div class="filter-group">
-            <label>Log Level</label>
-            <MultiSelect
-              v-model="selectedLevels"
-              :options="logFile?.logLevels || []"
-              placeholder="All Levels"
-              class="filter-control"
-            />
-          </div>
-          
-          <div class="filter-group">
-            <label>Search Text</label>
-            <InputText
-              v-model="searchText"
-              placeholder="Search messages..."
-              class="filter-control"
-            />
-          </div>
-          
-          <div class="filter-group">
-            <label>Date Range</label>
-            <Calendar
-              v-model="dateRange"
-              selectionMode="range"
-              :showIcon="true"
-              dateFormat="yy-mm-dd"
-              class="filter-control"
-            />
-          </div>
-          
-          <div class="filter-group">
-            <label>Actions</label>
-            <Button
-              icon="pi pi-times"
-              label="Clear Filters"
-              @click="clearFilters"
-              outlined
-              class="filter-control"
-            />
-          </div>
-        </div>
-      </template>
-    </Card>
+    <FiltersPanel 
+      :logLevels="logFile?.logLevels || []"
+      @updateFilters="handleUpdateFilters"
+      @clearFilters="handleClearFilters"
+    />
 
     <!-- Main Content -->
     <div class="main-content">
       <Splitter>
         <!-- Log Table -->
         <SplitterPanel :size="70" :minSize="50">
-          <Card class="logs-table-card">
-            <template #title>
-              <div class="table-header">
-                <i class="pi pi-list"></i>
-                Log Entries
-              </div>
-            </template>
-            
-            <template #content>
-              <DataTable
-                v-model:selection="selectedEntry"
-                :value="logEntries"
-                selectionMode="single"
-                @row-select="onRowSelect"
-                :loading="loading"
-                scrollable
-                scrollHeight="flex"
-                class="logs-table"
-              >
-                <Column field="timestamp" header="Timestamp" :sortable="true" style="width: 200px">
-                  <template #body="slotProps">
-                    <span class="timestamp">
-                      {{ formatTimestamp(slotProps.data.timestamp) }}
-                    </span>
-                  </template>
-                </Column>
-                
-                <Column field="level" header="Level" :sortable="true" style="width: 100px">
-                  <template #body="slotProps">
-                    <Tag
-                      :value="slotProps.data.level"
-                      :severity="getLevelSeverity(slotProps.data.level)"
-                      class="level-tag"
-                    />
-                  </template>
-                </Column>
-                
-                <Column field="message" header="Message" :sortable="true">
-                  <template #body="slotProps">
-                    <span class="message-text">{{ slotProps.data.message }}</span>
-                  </template>
-                </Column>
-                
-                <Column header="Actions" style="width: 80px">
-                  <template #body>
-                    <Button
-                      icon="pi pi-eye"
-                      size="small"
-                      text
-                      rounded
-                      aria-label="View Details"
-                    />
-                  </template>
-                </Column>
-              </DataTable>
-            </template>
-          </Card>
+          <LogTable 
+            :logEntries="filteredEntries"
+            :selectedEntry="selectedEntry"
+            :loading="loading"
+            @entrySelect="handleEntrySelect"
+          />
         </SplitterPanel>
 
         <!-- Details Panel -->
         <SplitterPanel :size="30" :minSize="25">
-          <Card class="details-panel-card">
-            <template #title>
-              <div class="panel-header">
-                <i class="pi pi-info-circle"></i>
-                Entry Details
-              </div>
-            </template>
-            
-            <template #content>
-              <div v-if="selectedEntry" class="details-content">
-                <div class="property-group">
-                  <div class="property-title">
-                    <i class="pi pi-clock"></i>
-                    Timestamp
-                  </div>
-                  <div class="property-value">{{ selectedEntry.timestamp }}</div>
-                </div>
-                
-                <div class="property-group">
-                  <div class="property-title">
-                    <i class="pi pi-tag"></i>
-                    Level
-                  </div>
-                  <div class="property-value">
-                    <Tag
-                      :value="selectedEntry.level"
-                      :severity="getLevelSeverity(selectedEntry.level)"
-                    />
-                  </div>
-                </div>
-                
-                <div class="property-group" v-if="selectedEntry.template">
-                  <div class="property-title">
-                    <i class="pi pi-file-edit"></i>
-                    Message Template
-                  </div>
-                  <div class="property-value template-text">{{ selectedEntry.template }}</div>
-                </div>
-                
-                <div class="property-group" v-if="selectedEntry.properties">
-                  <div class="property-title">
-                    <i class="pi pi-cog"></i>
-                    Properties
-                  </div>
-                  <div class="property-value json-text">
-                    {{ JSON.stringify(selectedEntry.properties, null, 2) }}
-                  </div>
-                </div>
-                
-                <div class="property-group" v-if="selectedEntry.exception">
-                  <div class="property-title">
-                    <i class="pi pi-exclamation-triangle"></i>
-                    Exception
-                  </div>
-                  <div class="property-value exception-text">{{ selectedEntry.exception }}</div>
-                </div>
-              </div>
-              
-              <div v-else class="no-selection">
-                <i class="pi pi-info-circle"></i>
-                <p>Select a log entry to view details</p>
-              </div>
-            </template>
-          </Card>
+          <DetailsPanel :selectedEntry="selectedEntry" />
         </SplitterPanel>
       </Splitter>
     </div>
 
     <!-- Status Bar -->
-    <div class="status-bar">
-      <div class="status-left">
-        <span v-if="logFile">
-          <i class="pi pi-chart-bar"></i>
-          {{ logFile.totalCount.toLocaleString() }} total entries
-        </span>
-        <span v-if="logEntries.length !== logFile?.totalCount">
-          <i class="pi pi-search"></i>
-          {{ logEntries.length }} filtered
-        </span>
-        <span>
-          <i class="pi pi-bolt"></i>
-          Ready
-        </span>
-      </div>
-      
-      <div class="status-right">
-        <span v-if="selectedEntry">
-          <i class="pi pi-map-marker"></i>
-          Entry {{ logEntries.indexOf(selectedEntry) + 1 }} of {{ logEntries.length }}
-        </span>
-        <span v-if="logFile">
-          <i class="pi pi-refresh"></i>
-          Loaded
-        </span>
-      </div>
-    </div>
+    <StatusBar 
+      :logFile="logFile"
+      :logEntries="filteredEntries"
+      :selectedEntry="selectedEntry"
+    />
   </div>
 </template>
 
@@ -382,218 +252,9 @@ async function testCleverlib() {
   box-sizing: border-box;
 }
 
-.app-toolbar {
-  background: var(--p-surface-card);
-  border: 1px solid var(--p-surface-border);
-  border-radius: 6px;
-  padding: 16px;
-}
-
-.toolbar-left {
-  display: flex;
-  align-items: center;
-  gap: 20px;
-}
-
-.app-title {
-  font-size: 24px;
-  font-weight: 700;
-  margin: 0;
-  color: var(--p-text-color);
-}
-
-.file-info {
-  font-size: 14px;
-  color: var(--p-text-muted-color);
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.toolbar-right {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.filters-panel {
-  border-radius: 6px;
-  background: var(--p-surface-card);
-  border: 1px solid var(--p-surface-border);
-}
-
-.filters-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 20px;
-  align-items: end;
-}
-
-.filter-group {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.filter-group label {
-  font-size: 12px;
-  font-weight: 600;
-  text-transform: uppercase;
-  color: var(--p-text-muted-color);
-  letter-spacing: 0.5px;
-}
-
-.filter-control {
-  width: 100%;
-}
-
 .main-content {
   flex: 1;
   min-height: 0;
-}
-
-.logs-table-card {
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-}
-
-.table-header {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-weight: 600;
-  color: var(--p-text-color);
-}
-
-.logs-table {
-  flex: 1;
-}
-
-.timestamp {
-  font-family: 'Courier New', monospace;
-  font-size: 12px;
-  color: var(--p-text-muted-color);
-}
-
-.level-tag {
-  font-size: 11px;
-  font-weight: 600;
-}
-
-.message-text {
-  font-size: 14px;
-  line-height: 1.4;
-  color: var(--p-text-color);
-}
-
-.details-panel-card {
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-}
-
-.panel-header {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-weight: 600;
-  color: var(--p-text-color);
-}
-
-.details-content {
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-  overflow-y: auto;
-  flex: 1;
-}
-
-.property-group {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.property-title {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-weight: 600;
-  color: var(--p-text-color);
-  font-size: 14px;
-}
-
-.property-value {
-  background: var(--p-surface-50);
-  border: 1px solid var(--p-surface-border);
-  padding: 12px;
-  border-radius: 6px;
-  font-size: 13px;
-  word-break: break-word;
-  color: var(--p-text-color);
-}
-
-.template-text {
-  font-family: 'Courier New', monospace;
-  background: var(--p-primary-50);
-  border-left: 4px solid var(--p-primary-color);
-}
-
-.json-text {
-  font-family: 'Courier New', monospace;
-  background: var(--p-surface-100);
-  border-left: 4px solid var(--p-text-muted-color);
-  white-space: pre-wrap;
-}
-
-.exception-text {
-  font-family: 'Courier New', monospace;
-  background: var(--p-red-50);
-  border-left: 4px solid var(--p-red-500);
-  white-space: pre-wrap;
-}
-
-.no-selection {
-  text-align: center;
-  color: var(--p-text-muted-color);
-  padding: 40px 20px;
-}
-
-.no-selection i {
-  font-size: 48px;
-  margin-bottom: 16px;
-  opacity: 0.5;
-}
-
-.status-bar {
-  height: 40px;
-  background: var(--p-surface-card);
-  border: 1px solid var(--p-surface-border);
-  color: var(--p-text-color);
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0 20px;
-  font-size: 13px;
-  border-radius: 6px;
-}
-
-.status-left,
-.status-right {
-  display: flex;
-  align-items: center;
-  gap: 20px;
-}
-
-.status-left span,
-.status-right span {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  color: var(--p-text-muted-color);
 }
 </style>
 
@@ -639,6 +300,38 @@ html, body {
   display: flex;
   flex-direction: column;
   overflow: hidden;
+}
+
+/* Prevent text selection when dragging splitter */
+.p-splitter-gutter {
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  cursor: col-resize;
+}
+
+/* Only prevent selection during actual splitter dragging */
+body.splitter-dragging * {
+  user-select: none !important;
+  -webkit-user-select: none !important;
+  -moz-user-select: none !important;
+  -ms-user-select: none !important;
+}
+
+/* Allow the splitter gutter itself to remain interactive */
+body.splitter-dragging .p-splitter-gutter {
+  cursor: col-resize !important;
+}
+
+/* Ensure normal text selection is preserved when not dragging */
+.p-datatable tbody tr td,
+.details-content,
+.property-value {
+  user-select: text;
+  -webkit-user-select: text;
+  -moz-user-select: text;
+  -ms-user-select: text;
 }
 
 .p-datatable {
