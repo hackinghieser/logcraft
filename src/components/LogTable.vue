@@ -59,12 +59,23 @@ function getLevelSeverity(level: string): "success" | "info" | "warning" | "dang
     </template>
     
     <template #content>
+      <div v-if="loading" class="loading-overlay">
+        <div class="loading-container">
+          <div class="loading-spinner">
+            <div class="spinner-ring"></div>
+            <div class="spinner-ring"></div>
+            <div class="spinner-ring"></div>
+          </div>
+          <p class="loading-text">Loading log entries...</p>
+        </div>
+      </div>
+      
       <DataTable
+        v-else
         :value="logEntries"
         :selection="selectedEntry"
         selectionMode="single"
         @row-select="onRowSelect"
-        :loading="loading"
         scrollable
         scrollHeight="flex"
         class="logs-table"
@@ -115,6 +126,7 @@ function getLevelSeverity(level: string): "success" | "info" | "warning" | "dang
   display: flex;
   flex-direction: column;
   overflow: hidden;
+  position: relative;
 }
 
 .logs-table-card :deep(.p-card-content),
@@ -143,7 +155,7 @@ function getLevelSeverity(level: string): "success" | "info" | "warning" | "dang
 }
 
 .timestamp {
-  font-size: 12px;
+  font-size: 11px;
   color: var(--p-text-muted-color);
 }
 
@@ -156,8 +168,83 @@ function getLevelSeverity(level: string): "success" | "info" | "warning" | "dang
 }
 
 .message-text {
-  font-size: 14px;
-  line-height: 1.4;
+  font-size: 13px;
+  line-height: 1.3;
   color: var(--p-text-color);
+}
+
+/* Modern Loading Animation */
+.loading-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 24px;
+}
+
+.loading-spinner {
+  position: relative;
+  width: 60px;
+  height: 60px;
+}
+
+.spinner-ring {
+  position: absolute;
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  border: 3px solid transparent;
+  border-top: 3px solid var(--p-primary-500);
+  animation: spin 1.2s linear infinite;
+}
+
+.spinner-ring:nth-child(1) {
+  animation-delay: 0s;
+  opacity: 1;
+}
+
+.spinner-ring:nth-child(2) {
+  animation-delay: -0.4s;
+  opacity: 0.6;
+  transform: scale(0.8);
+  border-top-color: var(--p-primary-400);
+}
+
+.spinner-ring:nth-child(3) {
+  animation-delay: -0.8s;
+  opacity: 0.3;
+  transform: scale(0.6);
+  border-top-color: var(--p-primary-300);
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.loading-text {
+  color: var(--p-text-muted-color);
+  font-size: 16px;
+  font-weight: 500;
+  margin: 0;
+  text-align: center;
+  letter-spacing: 0.5px;
 }
 </style>

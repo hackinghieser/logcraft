@@ -457,13 +457,15 @@ body.splitter-dragging .p-splitter-gutter {
 
 .p-datatable .p-datatable-tbody > tr {
   background: transparent;
-  height: 36px;
+  height: 32px;
+  transition: all 0.2s ease;
+  border-bottom: 1px solid var(--p-surface-border);
 }
 
 .p-datatable .p-datatable-tbody > tr td {
   padding: 6px 0;
-  font-size: 14px;
-  line-height: 1.2;
+  font-size: 13px;
+  line-height: 1.3;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -479,17 +481,23 @@ body.splitter-dragging .p-splitter-gutter {
 }
 
 .p-datatable .p-datatable-tbody > tr:hover {
-  background: rgba(0, 0, 0, 0.02);
+  background: var(--p-surface-hover);
 }
 
 .p-datatable .p-datatable-tbody > tr.p-highlight {
-  background: rgba(33, 150, 243, 0.1);
+  background: var(--p-primary-50);
+  border-left: 3px solid var(--p-primary-500);
 }
 
 .p-datatable .p-datatable-thead > tr > th {
-  padding: 8px 0;
-  font-size: 14px;
+  padding: 10px 0;
+  font-size: 12px;
   font-weight: 600;
+  background: var(--p-surface-50);
+  border-bottom: 2px solid var(--p-surface-border);
+  color: var(--p-text-muted-color);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
 .p-datatable .p-datatable-thead > tr > th:first-child {
