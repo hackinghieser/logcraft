@@ -36,55 +36,9 @@ const selectedEntry = ref<LogEntry | null>(null);
 const loading = ref(false);
 
 // Sample data for development
-const sampleEntries: LogEntry[] = [
-  {
-    timestamp: "2024-01-15T10:30:45.123Z",
-    level: "Error",
-    message: "Database connection failed: timeout after 30s",
-    template: "Database connection failed: {ErrorDetails}",
-    exception: "System.TimeoutException: The operation has timed out.\n   at Database.Connect()\n   at Service.Initialize()",
-    properties: { ErrorDetails: "timeout after 30s", ConnectionString: "postgresql://...", RetryCount: 3 }
-  },
-  {
-    timestamp: "2024-01-15T10:30:44.891Z",
-    level: "Warning",
-    message: "Retrying connection attempt 3/5",
-    template: "Retrying connection attempt {Attempt}/{MaxAttempts}",
-    properties: { Attempt: 3, MaxAttempts: 5 }
-  },
-  {
-    timestamp: "2024-01-15T10:30:43.567Z",
-    level: "Information",
-    message: "User alice logged in from IP 192.168.1.100",
-    template: "User {Username} logged in from IP {IPAddress}",
-    properties: { Username: "alice", IPAddress: "192.168.1.100" }
-  },
-  {
-    timestamp: "2024-01-15T10:30:42.234Z",
-    level: "Debug",
-    message: "Processing order #12345 for customer CUST-789",
-    template: "Processing order #{OrderId} for customer {CustomerId}",
-    properties: { OrderId: "12345", CustomerId: "CUST-789", Amount: 99.99, Currency: "USD" }
-  },
-  {
-    timestamp: "2024-01-15T10:30:41.098Z",
-    level: "Information",
-    message: "Application startup completed in 1.23s",
-    template: "Application startup completed in {Duration}",
-    properties: { Duration: "1.23s" }
-  }
-];
 
-// Initialize with sample data
-logEntries.value = sampleEntries;
-filteredEntries.value = [...sampleEntries];
-selectedEntry.value = sampleEntries[0];
-logFile.value = {
-  path: "events.clef",
-  totalCount: 15432,
-  logLevels: ["Error", "Warning", "Information", "Debug"],
-  dateRange: ["2024-01-15T10:30:00.000Z", "2024-01-15T10:35:00.000Z"]
-};
+
+
 
 // Event handlers
 async function handleOpenFile() {
