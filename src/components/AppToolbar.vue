@@ -72,33 +72,34 @@ async function testCleverlib() {
   background: var(--p-surface-card);
   border: 1px solid var(--p-surface-border);
   border-radius: 6px;
-  padding: 16px;
+  padding: 8px 16px;
+  min-height: 48px;
 }
 
 .toolbar-left {
   display: flex;
   align-items: center;
-  gap: 20px;
+  gap: 16px;
 }
 
 .app-title {
-  font-size: 24px;
+  font-size: 20px;
   font-weight: 700;
   margin: 0;
   color: var(--p-text-color);
 }
 
 .file-info {
-  font-size: 14px;
+  font-size: 13px;
   color: var(--p-text-muted-color);
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
 }
 
 .toolbar-right {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 8px;
 }
 </style>

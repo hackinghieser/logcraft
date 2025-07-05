@@ -344,6 +344,12 @@ body.splitter-dragging .p-splitter-gutter {
 .p-datatable .p-datatable-wrapper {
   flex: 1;
   overflow: auto;
+  height: 100%;
+}
+
+.p-datatable .p-datatable-table {
+  width: 100%;
+  table-layout: fixed;
 }
 
 .p-datatable .p-datatable-header {
@@ -353,6 +359,24 @@ body.splitter-dragging .p-splitter-gutter {
 
 .p-datatable .p-datatable-tbody > tr {
   background: transparent;
+  height: 36px;
+}
+
+.p-datatable .p-datatable-tbody > tr td {
+  padding: 6px 0;
+  font-size: 14px;
+  line-height: 1.2;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.p-datatable .p-datatable-tbody > tr td:first-child {
+  padding-left: 12px;
+}
+
+.p-datatable .p-datatable-tbody > tr td:last-child {
+  padding-right: 12px;
 }
 
 .p-datatable .p-datatable-tbody > tr:hover {
@@ -361,6 +385,20 @@ body.splitter-dragging .p-splitter-gutter {
 
 .p-datatable .p-datatable-tbody > tr.p-highlight {
   background: rgba(33, 150, 243, 0.1);
+}
+
+.p-datatable .p-datatable-thead > tr > th {
+  padding: 8px 0;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.p-datatable .p-datatable-thead > tr > th:first-child {
+  padding-left: 12px;
+}
+
+.p-datatable .p-datatable-thead > tr > th:last-child {
+  padding-right: 12px;
 }
 
 .p-button {

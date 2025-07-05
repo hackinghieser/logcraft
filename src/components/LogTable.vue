@@ -117,12 +117,22 @@ function getLevelSeverity(level: string): "success" | "info" | "warning" | "dang
   overflow: hidden;
 }
 
+.logs-table-card :deep(.p-card-content),
+.logs-table-card :deep(.p-card-body) {
+  padding: 0;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
 .table-header {
   display: flex;
   align-items: center;
   gap: 8px;
   font-weight: 600;
   color: var(--p-text-color);
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--p-surface-border);
 }
 
 .logs-table {

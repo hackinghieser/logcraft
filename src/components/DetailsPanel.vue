@@ -106,12 +106,22 @@ function getLevelSeverity(level: string): "success" | "info" | "warning" | "dang
   overflow: hidden;
 }
 
+.details-panel-card :deep(.p-card-content),
+.details-panel-card :deep(.p-card-body) {
+  padding: 0;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
 .panel-header {
   display: flex;
   align-items: center;
   gap: 8px;
   font-weight: 600;
   color: var(--p-text-color);
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--p-surface-border);
 }
 
 .details-content {
@@ -120,6 +130,7 @@ function getLevelSeverity(level: string): "success" | "info" | "warning" | "dang
   gap: 20px;
   overflow-y: auto;
   flex: 1;
+  padding: 16px;
 }
 
 .property-group {
@@ -170,7 +181,7 @@ function getLevelSeverity(level: string): "success" | "info" | "warning" | "dang
 .no-selection {
   text-align: center;
   color: var(--p-text-muted-color);
-  padding: 40px 20px;
+  padding: 40px 16px;
 }
 
 .no-selection i {

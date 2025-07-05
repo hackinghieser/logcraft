@@ -109,9 +109,16 @@ watch([selectedLevels, searchText, dateRange], () => {
 
 .filters-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  grid-template-columns: 1fr 1fr 1fr auto;
   gap: 20px;
   align-items: end;
+}
+
+@media (max-width: 768px) {
+  .filters-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
 }
 
 .filter-group {
@@ -130,71 +137,89 @@ watch([selectedLevels, searchText, dateRange], () => {
 
 .filter-control {
   width: 100%;
-  height: 40px;
+  height: 32px;
   display: flex;
   align-items: center;
 }
 
 /* Ensure consistent height for all PrimeVue components */
 .filter-control :deep(.p-inputtext) {
-  height: 40px;
+  height: 32px;
+  font-size: 14px;
 }
 
 .filter-control :deep(.p-multiselect) {
-  height: 40px;
+  height: 32px;
+}
+
+.filter-control :deep(.p-multiselect .p-multiselect-label) {
+  font-size: 14px;
+  padding: 6px 12px;
 }
 
 .filter-control :deep(.p-calendar),
 .filter-control :deep(.p-datepicker-dropdown) {
-  height: 40px;
+  height: 32px;
 }
 
 .filter-control :deep(.p-calendar .p-inputgroup),
 .filter-control :deep(.p-datepicker-dropdown .p-inputgroup) {
-  height: 40px;
+  height: 32px;
 }
 
 .filter-control :deep(.p-calendar .p-calendar-input-wrapper),
 .filter-control :deep(.p-datepicker-dropdown .p-calendar-input-wrapper) {
-  height: 40px;
+  height: 32px;
   display: flex;
   align-items: stretch;
 }
 
 .filter-control :deep(.p-calendar .p-inputtext),
 .filter-control :deep(.p-datepicker-dropdown .p-inputtext) {
-  height: 40px;
+  height: 32px;
+  font-size: 14px;
   border-right: none;
-  border-radius: 6px 0 0 6px;
+  border-radius: 4px 0 0 4px;
 }
 
 .filter-control :deep(.p-calendar .p-calendar-button),
 .filter-control :deep(.p-datepicker-dropdown .p-calendar-button) {
-  border-radius: 0 6px 6px 0;
+  height: 32px;
+  width: 32px;
+  border-radius: 0 4px 4px 0;
   border-left: none;
 }
 
 .filter-control :deep(.p-button) {
-  height: 40px;
+  height: 32px;
   justify-content: center;
+  font-size: 14px;
 }
 
-/* Align dropdown triggers */
-.filter-control :deep(.p-multiselect-trigger) {
-  height: 38px;
+/* Make clear filter button smaller and square */
+.filter-group:last-child .filter-control {
+  width: 32px;
+  align-self: flex-end;
 }
 
-.filter-control :deep(.p-calendar-button) {
-  height: 38px;
-  width: 38px;
+.filter-group:last-child .filter-control :deep(.p-button) {
+  width: 32px;
+  height: 32px;
+  min-width: 32px;
+  padding: 0;
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
+/* Align dropdown triggers */
+.filter-control :deep(.p-multiselect-trigger) {
+  height: 30px;
+}
+
 .filter-control :deep(.p-calendar-button .p-icon) {
-  font-size: 20px;
-  width: 20px;
-  height: 20px;
+  font-size: 16px;
+  width: 16px;
+  height: 16px;
 }
 </style>
