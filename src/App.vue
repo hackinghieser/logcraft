@@ -10,6 +10,8 @@ import LogTable from "./components/LogTable.vue";
 import DetailsPanel from "./components/DetailsPanel.vue";
 import StatusBar from "./components/StatusBar.vue";
 
+import { Filters } from "./types";
+
 // Types
 interface LogEntry {
   timestamp: string;
@@ -34,6 +36,13 @@ const logEntries = ref<LogEntry[]>([]);
 const filteredEntries = ref<LogEntry[]>([]);
 const selectedEntry = ref<LogEntry | null>(null);
 const loading = ref(false);
+
+// Filter state
+const currentFilters = ref<Filters>({
+  selectedLevels: [],
+  searchText: "",
+  dateRange: []
+});
 
 // Pagination state
 const currentPage = ref(0);
@@ -144,8 +153,8 @@ async function loadMoreEntries() {
       
       if (moreEntries.length > 0) {
         logEntries.value.push(...moreEntries);
-        filteredEntries.value = [...logEntries.value];
         currentPage.value = nextPage;
+        applyFilters(); // Re-apply filters after loading more entries
         
         // Check if we've loaded all entries
         if (logEntries.value.length >= currentLogFile.totalCount) {
@@ -187,7 +196,7 @@ async function handleFileOpen(filePath: string) {
     };
     
     logEntries.value = events;
-    filteredEntries.value = [...events];
+    applyFilters(); // Apply filters after initial load
     selectedEntry.value = events.length > 0 ? events[0] : null;
     
     // Check if there are more pages to load
@@ -212,10 +221,10 @@ function handleOpenSettings() {
   console.log("Open settings...");
 }
 
-function handleUpdateFilters(filters: { selectedLevels: string[]; searchText: string; dateRange: Date[] }) {
-  // Apply filters to logEntries
+function applyFilters() {
   let filtered = [...logEntries.value];
-  
+  const filters = currentFilters.value;
+
   // Filter by log levels
   if (filters.selectedLevels.length > 0) {
     filtered = filtered.filter(entry => filters.selectedLevels.includes(entry.level));
@@ -246,6 +255,11 @@ function handleUpdateFilters(filters: { selectedLevels: string[]; searchText: st
   if (selectedEntry.value && !filtered.includes(selectedEntry.value)) {
     selectedEntry.value = filtered.length > 0 ? filtered[0] : null;
   }
+}
+
+function handleUpdateFilters(filters: { selectedLevels: string[]; searchText: string; dateRange: Date[] }) {
+  currentFilters.value = filters;
+  applyFilters();
 }
 
 
@@ -307,6 +321,9 @@ onUnmounted(() => {
   if ((window as any)._cleanupFileDropListener) {
     (window as any)._cleanupFileDropListener();
   }
+
+  // Terminate the worker when the component is unmounted
+  filterWorker.terminate();
 });
 </script>
 
@@ -326,6 +343,7 @@ onUnmounted(() => {
     <!-- Filters Panel -->
     <FiltersPanel 
       :logLevels="logFile?.logLevels || []"
+      :initialFilters="currentFilters"
       @updateFilters="handleUpdateFilters"
     />
 

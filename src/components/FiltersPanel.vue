@@ -1,16 +1,28 @@
 <script setup lang="ts">
-import { ref } from "vue";
+import { ref, watch } from "vue";
 import Button from "primevue/button";
 import InputText from "primevue/inputtext";
 import MultiSelect from "primevue/multiselect";
 import Calendar from "primevue/calendar";
 
-interface Props {
-  logLevels?: string[];
+interface Filters {
+  selectedLevels: string[];
+  searchText: string;
+  dateRange: Date[];
 }
 
-withDefaults(defineProps<Props>(), {
-  logLevels: () => []
+interface Props {
+  logLevels?: string[];
+  initialFilters: Filters;
+}
+
+const props = withDefaults(defineProps<Props>(), {
+  logLevels: () => [],
+  initialFilters: () => ({
+    selectedLevels: [],
+    searchText: "",
+    dateRange: []
+  })
 });
 
 const emit = defineEmits<{
@@ -21,15 +33,16 @@ const emit = defineEmits<{
   }];
 }>();
 
-const selectedLevels = ref<string[]>([]);
-const searchText = ref("");
-const dateRange = ref<Date[]>([]);
+const selectedLevels = ref<string[]>(props.initialFilters.selectedLevels);
+const searchText = ref(props.initialFilters.searchText);
+const dateRange = ref<Date[]>(props.initialFilters.dateRange);
+
+
 
 function clearFilters() {
   selectedLevels.value = [];
   searchText.value = "";
   dateRange.value = [];
-  emitFilters();
 }
 
 function emitFilters() {
@@ -41,10 +54,10 @@ function emitFilters() {
 }
 
 // Watch for changes and emit
-import { watch } from "vue";
 watch([selectedLevels, searchText, dateRange], () => {
   emitFilters();
 }, { deep: true });
+
 </script>
 
 <template>
