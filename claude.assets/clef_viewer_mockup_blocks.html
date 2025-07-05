@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CLEF Log Viewer - Layout Blocks</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f0f2f5;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            padding: 8px;
+        }
+
+        .block {
+            border: 2px dashed #666;
+            border-radius: 8px;
+            padding: 16px;
+            background: white;
+            position: relative;
+        }
+
+        .block-label {
+            position: absolute;
+            top: -12px;
+            left: 16px;
+            background: #007bff;
+            color: white;
+            padding: 4px 12px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .toolbar-block {
+            height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .toolbar-left, .toolbar-right {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .app-title {
+            font-size: 24px;
+            font-weight: 700;
+        }
+
+        .file-info {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        .btn-mockup {
+            padding: 8px 16px;
+            background: rgba(255,255,255,0.2);
+            border: 1px solid rgba(255,255,255,0.3);
+            border-radius: 6px;
+            color: white;
+            font-size: 14px;
+        }
+
+        .filters-block {
+            height: 100px;
+            display: flex;
+            align-items: center;
+            gap: 24px;
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .filter-label {
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            opacity: 0.9;
+        }
+
+        .filter-control {
+            padding: 8px 12px;
+            background: rgba(255,255,255,0.2);
+            border: 1px solid rgba(255,255,255,0.3);
+            border-radius: 4px;
+            color: white;
+            font-size: 14px;
+        }
+
+        .main-content {
+            flex: 1;
+            display: grid;
+            grid-template-columns: 1fr 350px;
+            gap: 8px;
+        }
+
+        .logs-table-block {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            display: flex;
+            flex-direction: column;
+            min-height: 0;
+        }
+
+        .table-header {
+            padding: 16px;
+            border-bottom: 1px solid rgba(255,255,255,0.2);
+            font-weight: 600;
+            background: rgba(0,0,0,0.1);
+        }
+
+        .table-content {
+            flex: 1;
+            padding: 16px;
+            overflow: auto;
+        }
+
+        .log-row {
+            display: grid;
+            grid-template-columns: 180px 80px 1fr 60px;
+            gap: 16px;
+            padding: 12px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            align-items: center;
+        }
+
+        .log-row:last-child {
+            border-bottom: none;
+        }
+
+        .timestamp {
+            font-family: monospace;
+            font-size: 12px;
+        }
+
+        .level {
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 600;
+            text-align: center;
+        }
+
+        .level-error {
+            background: #ff4757;
+        }
+
+        .level-warning {
+            background: #ffa502;
+        }
+
+        .level-info {
+            background: #3742fa;
+        }
+
+        .level-debug {
+            background: #747d8c;
+        }
+
+        .message {
+            font-size: 14px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .details-panel-block {
+            background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+            color: #333;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .panel-header {
+            padding: 16px;
+            border-bottom: 1px solid rgba(0,0,0,0.1);
+            font-weight: 600;
+            background: rgba(0,0,0,0.1);
+            color: white;
+        }
+
+        .panel-content {
+            flex: 1;
+            padding: 16px;
+            overflow: auto;
+        }
+
+        .property-group {
+            margin-bottom: 20px;
+        }
+
+        .property-title {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #333;
+        }
+
+        .property-value {
+            background: rgba(255,255,255,0.8);
+            padding: 8px 12px;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 13px;
+            word-break: break-all;
+        }
+
+        .status-bar {
+            height: 40px;
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 20px;
+            font-size: 13px;
+        }
+
+        .status-left, .status-right {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .mockup-note {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #343a40;
+            color: white;
+            padding: 12px 16px;
+            border-radius: 8px;
+            font-size: 14px;
+            max-width: 300px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        }
+    </style>
+</head>
+<body>
+    <div class="mockup-note">
+        📋 UI Layout Mockup<br>
+        Each colored block represents a major component of the CLEF log viewer interface.
+    </div>
+
+    <!-- Toolbar Block -->
+    <div class="block toolbar-block">
+        <div class="block-label">Toolbar</div>
+        <div class="toolbar-left">
+            <div class="app-title">CLEF Log Viewer</div>
+            <div class="file-info">📁 events.clef • 15,432 entries • 2.3 MB</div>
+        </div>
+        <div class="toolbar-right">
+            <div class="btn-mockup">📂 Open File</div>
+            <div class="btn-mockup">🌙 Theme</div>
+            <div class="btn-mockup">⚙️ Settings</div>
+        </div>
+    </div>
+
+    <!-- Filters Block -->
+    <div class="block filters-block">
+        <div class="block-label">Filters & Search</div>
+        <div class="filter-group">
+            <div class="filter-label">Log Level</div>
+            <div class="filter-control">🔽 All Levels</div>
+        </div>
+        <div class="filter-group">
+            <div class="filter-label">Search Text</div>
+            <div class="filter-control">🔍 Search messages...</div>
+        </div>
+        <div class="filter-group">
+            <div class="filter-label">Date Range</div>
+            <div class="filter-control">📅 Last 24 hours</div>
+        </div>
+        <div class="filter-group">
+            <div class="filter-label">Actions</div>
+            <div class="filter-control">🧹 Clear Filters</div>
+        </div>
+    </div>
+
+    <!-- Main Content Grid -->
+    <div class="main-content">
+        <!-- Logs Table Block -->
+        <div class="block logs-table-block">
+            <div class="block-label">Log Entries Table</div>
+            <div class="table-header">
+                Timestamp • Level • Message • Actions
+            </div>
+            <div class="table-content">
+                <div class="log-row">
+                    <div class="timestamp">2024-01-15 10:30:45.123</div>
+                    <div class="level level-error">ERROR</div>
+                    <div class="message">Database connection failed: timeout after 30s</div>
+                    <div>👁️</div>
+                </div>
+                <div class="log-row">
+                    <div class="timestamp">2024-01-15 10:30:44.891</div>
+                    <div class="level level-warning">WARN</div>
+                    <div class="message">Retrying connection attempt 3/5</div>
+                    <div>👁️</div>
+                </div>
+                <div class="log-row">
+                    <div class="timestamp">2024-01-15 10:30:43.567</div>
+                    <div class="level level-info">INFO</div>
+                    <div class="message">User alice logged in from IP 192.168.1.100</div>
+                    <div>👁️</div>
+                </div>
+                <div class="log-row">
+                    <div class="timestamp">2024-01-15 10:30:42.234</div>
+                    <div class="level level-debug">DEBUG</div>
+                    <div class="message">Processing order #12345 for customer CUST-789</div>
+                    <div>👁️</div>
+                </div>
+                <div class="log-row">
+                    <div class="timestamp">2024-01-15 10:30:41.098</div>
+                    <div class="level level-info">INFO</div>
+                    <div class="message">Application startup completed in 1.23s</div>
+                    <div>👁️</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Details Panel Block -->
+        <div class="block details-panel-block">
+            <div class="block-label">Entry Details</div>
+            <div class="panel-header">
+                Selected Log Entry Details
+            </div>
+            <div class="panel-content">
+                <div class="property-group">
+                    <div class="property-title">🕒 Timestamp</div>
+                    <div class="property-value">2024-01-15T10:30:45.123Z</div>
+                </div>
+                
+                <div class="property-group">
+                    <div class="property-title">📊 Level</div>
+                    <div class="property-value">ERROR</div>
+                </div>
+                
+                <div class="property-group">
+                    <div class="property-title">📝 Message Template</div>
+                    <div class="property-value">Database connection failed: {ErrorDetails}</div>
+                </div>
+                
+                <div class="property-group">
+                    <div class="property-title">🔧 Properties</div>
+                    <div class="property-value">{
+  "ErrorDetails": "timeout after 30s",
+  "ConnectionString": "postgresql://...",
+  "RetryCount": 3,
+  "RequestId": "req-abc-123"
+}</div>
+                </div>
+                
+                <div class="property-group">
+                    <div class="property-title">🐛 Exception</div>
+                    <div class="property-value">System.TimeoutException: The operation has timed out.
+   at Database.Connect()
+   at Service.Initialize()</div>
+                </div>
+                
+                <div class="property-group">
+                    <div class="property-title">📄 Raw JSON</div>
+                    <div class="property-value">{"@t":"2024-01-15T10:30:45.123Z","@mt":"Database connection failed: {ErrorDetails}","@l":"Error","ErrorDetails":"timeout after 30s"}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Status Bar Block -->
+    <div class="block status-bar">
+        <div class="block-label">Status Bar</div>
+        <div class="status-left">
+            <span>📊 15,432 total entries</span>
+            <span>🔍 127 filtered</span>
+            <span>⚡ Loaded in 0.8s</span>
+        </div>
+        <div class="status-right">
+            <span>💾 2.3 MB</span>
+            <span>📍 Line 1,234</span>
+            <span>🔄 Ready</span>
+        </div>
+    </div>
+</body>
+</html>
