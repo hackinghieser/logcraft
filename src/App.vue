@@ -35,6 +35,11 @@ const filteredEntries = ref<LogEntry[]>([]);
 const selectedEntry = ref<LogEntry | null>(null);
 const loading = ref(false);
 
+// Pagination state
+const currentPage = ref(0);
+const hasMorePages = ref(true);
+const loadingMore = ref(false);
+
 // Sample data for development
 
 
@@ -117,6 +122,45 @@ async function handleFileDropped(filePath: string) {
   }
 }
 
+// Load more log entries from the next page (non-blocking)
+async function loadMoreEntries() {
+  if (!logFile.value || loadingMore.value || !hasMorePages.value) {
+    return;
+  }
+
+  loadingMore.value = true;
+  
+  // Load in background without blocking UI
+  setTimeout(async () => {
+    try {
+      const { invoke } = await import('@tauri-apps/api/core');
+      
+      const nextPage = currentPage.value + 1;
+      const moreEntries = await invoke('load_log_entries_page', { 
+        filePath: logFile.value.path, 
+        page: nextPage 
+      }) as LogEntry[];
+      
+      if (moreEntries.length > 0) {
+        logEntries.value.push(...moreEntries);
+        filteredEntries.value = [...logEntries.value];
+        currentPage.value = nextPage;
+        
+        // Check if we've loaded all entries
+        if (logEntries.value.length >= logFile.value.totalCount) {
+          hasMorePages.value = false;
+        }
+      } else {
+        hasMorePages.value = false;
+      }
+    } catch (error) {
+      console.error('Failed to load more entries:', error);
+    } finally {
+      loadingMore.value = false;
+    }
+  }, 0);
+}
+
 // Extract file opening logic to reuse for both dialog and drag & drop
 async function handleFileOpen(filePath: string) {
   loading.value = true;
@@ -124,7 +168,12 @@ async function handleFileOpen(filePath: string) {
     // Import Tauri APIs
     const { invoke } = await import('@tauri-apps/api/core');
     
-    // Parse the selected file
+    // Reset pagination state
+    currentPage.value = 0;
+    hasMorePages.value = true;
+    loadingMore.value = false;
+    
+    // Parse the selected file (now returns only first page)
     const result = await invoke('parse_clef_file', { filePath }) as [any, LogEntry[]];
     const [fileInfo, events] = result;
     
@@ -140,7 +189,10 @@ async function handleFileOpen(filePath: string) {
     filteredEntries.value = [...events];
     selectedEntry.value = events.length > 0 ? events[0] : null;
     
-    console.log(`Loaded ${events.length} log entries from ${fileInfo.path}`);
+    // Check if there are more pages to load
+    hasMorePages.value = events.length < fileInfo.total_count;
+    
+    console.log(`Loaded first page: ${events.length} of ${fileInfo.total_count} log entries from ${fileInfo.path}`);
   } catch (error) {
     console.error('Failed to parse log file:', error);
     alert(`Failed to parse log file: ${error}`);
@@ -285,7 +337,10 @@ onUnmounted(() => {
             :logEntries="filteredEntries"
             :selectedEntry="selectedEntry"
             :loading="loading"
+            :hasMorePages="hasMorePages"
+            :loadingMore="loadingMore"
             @entrySelect="handleEntrySelect"
+            @loadMore="loadMoreEntries"
           />
         </SplitterPanel>
 
@@ -301,6 +356,7 @@ onUnmounted(() => {
       :logFile="logFile"
       :logEntries="filteredEntries"
       :selectedEntry="selectedEntry"
+      :loadingMore="loadingMore"
     />
   </div>
 </template>

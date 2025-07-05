@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { ref, onMounted, onUnmounted, nextTick, watch } from "vue";
 import DataTable from "primevue/datatable";
 import Column from "primevue/column";
 import Button from "primevue/button";
@@ -19,15 +20,20 @@ interface Props {
   logEntries: LogEntry[];
   selectedEntry?: LogEntry | null;
   loading?: boolean;
+  hasMorePages?: boolean;
+  loadingMore?: boolean;
 }
 
-withDefaults(defineProps<Props>(), {
+const props = withDefaults(defineProps<Props>(), {
   selectedEntry: null,
-  loading: false
+  loading: false,
+  hasMorePages: false,
+  loadingMore: false
 });
 
 const emit = defineEmits<{
   entrySelect: [entry: LogEntry];
+  loadMore: [];
 }>();
 
 function onRowSelect(event: any) {
@@ -47,6 +53,90 @@ function getLevelSeverity(level: string): "success" | "info" | "warning" | "dang
     default: return "info";
   }
 }
+
+// Scroll-based pagination
+const dataTableRef = ref<any>(null);
+
+function handleScroll(event: Event) {
+  if (props.loadingMore || !props.hasMorePages || props.loading) {
+    return;
+  }
+
+  const element = event.target as HTMLElement;
+  const threshold = 200; // Trigger load when 200px from bottom (earlier)
+  
+  if (element.scrollTop + element.clientHeight >= element.scrollHeight - threshold) {
+    emit('loadMore');
+  }
+}
+
+let scrollElement: HTMLElement | null = null;
+
+const setupScrollListener = async () => {
+  // Wait for the DOM to be fully updated
+  await nextTick();
+  
+  // Remove existing listener if any
+  if (scrollElement) {
+    scrollElement.removeEventListener('scroll', handleScroll);
+    scrollElement = null;
+  }
+  
+  // Method 1: Via DataTable ref
+  if (dataTableRef.value && dataTableRef.value.$el) {
+    const wrapper = dataTableRef.value.$el.querySelector('.p-datatable-wrapper');
+    if (wrapper) {
+      scrollElement = wrapper as HTMLElement;
+      wrapper.addEventListener('scroll', handleScroll, { passive: true });
+      return true;
+    }
+  }
+  
+  // Method 2: Direct class search
+  const wrapper = document.querySelector('.p-datatable-wrapper');
+  if (wrapper) {
+    scrollElement = wrapper as HTMLElement;
+    wrapper.addEventListener('scroll', handleScroll, { passive: true });
+    return true;
+  }
+  
+  // Method 3: Look for any element with overflow
+  const scrollables = document.querySelectorAll('[style*="overflow"], .p-datatable-wrapper');
+  for (const element of scrollables) {
+    const styles = window.getComputedStyle(element);
+    if (styles.overflow === 'auto' || styles.overflowY === 'auto') {
+      scrollElement = element as HTMLElement;
+      element.addEventListener('scroll', handleScroll, { passive: true });
+      return true;
+    }
+  }
+  
+  return false;
+};
+
+// Watch for when logEntries change (data is loaded) and setup scroll listener
+watch(() => props.logEntries.length, async (newLength) => {
+  if (newLength > 0) {
+    await setupScrollListener();
+  }
+});
+
+onMounted(async () => {
+  // Try multiple times with different delays
+  for (let attempt = 0; attempt < 5; attempt++) {
+    await new Promise(resolve => setTimeout(resolve, attempt * 200));
+    if (await setupScrollListener()) {
+      break;
+    }
+  }
+});
+
+onUnmounted(() => {
+  if (scrollElement) {
+    scrollElement.removeEventListener('scroll', handleScroll);
+    scrollElement = null;
+  }
+});
 </script>
 
 <template>
@@ -72,6 +162,7 @@ function getLevelSeverity(level: string): "success" | "info" | "warning" | "dang
       
       <DataTable
         v-else
+        ref="dataTableRef"
         :value="logEntries"
         :selection="selectedEntry"
         selectionMode="single"
@@ -116,6 +207,14 @@ function getLevelSeverity(level: string): "success" | "info" | "warning" | "dang
           </template>
         </Column>
       </DataTable>
+      
+      <!-- Loading More Indicator -->
+      <div v-if="loadingMore" class="loading-more-container">
+        <div class="loading-more-spinner">
+          <div class="spinner-ring"></div>
+        </div>
+        <p class="loading-more-text">Loading more entries...</p>
+      </div>
     </template>
   </Card>
 </template>
@@ -246,5 +345,40 @@ function getLevelSeverity(level: string): "success" | "info" | "warning" | "dang
   margin: 0;
   text-align: center;
   letter-spacing: 0.5px;
+}
+
+/* Loading More Indicator */
+.loading-more-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px;
+  border-top: 1px solid var(--p-surface-border);
+  background: var(--p-surface-50);
+}
+
+.loading-more-spinner {
+  position: relative;
+  width: 30px;
+  height: 30px;
+  margin-bottom: 12px;
+}
+
+.loading-more-spinner .spinner-ring {
+  position: absolute;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  border-top: 2px solid var(--p-primary-500);
+  animation: spin 1s linear infinite;
+}
+
+.loading-more-text {
+  color: var(--p-text-muted-color);
+  font-size: 14px;
+  font-weight: 500;
+  margin: 0;
+  text-align: center;
 }
 </style>

@@ -20,11 +20,13 @@ interface Props {
   logFile?: LogFileInfo | null;
   logEntries: LogEntry[];
   selectedEntry?: LogEntry | null;
+  loadingMore?: boolean;
 }
 
 const props = withDefaults(defineProps<Props>(), {
   logFile: null,
-  selectedEntry: null
+  selectedEntry: null,
+  loadingMore: false
 });
 
 function getSelectedEntryIndex(): number {
@@ -47,7 +49,11 @@ function getSelectedEntryIndex(): number {
     </div>
     
     <div class="status-right">
-      <span v-if="selectedEntry">
+      <span v-if="loadingMore" class="loading-indicator">
+        <i class="pi pi-spin pi-spinner"></i>
+        Loading more entries...
+      </span>
+      <span v-else-if="selectedEntry">
         <i class="pi pi-map-marker"></i>
         Entry {{ getSelectedEntryIndex() + 1 }} of {{ logEntries.length }}
       </span>
@@ -82,5 +88,10 @@ function getSelectedEntryIndex(): number {
   align-items: center;
   gap: 6px;
   color: var(--p-text-muted-color);
+}
+
+.loading-indicator {
+  color: var(--p-primary-500) !important;
+  font-weight: 500;
 }
 </style>
