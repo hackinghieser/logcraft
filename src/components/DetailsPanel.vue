@@ -193,12 +193,13 @@ function formatTimestamp(timestamp: string): string {
   border-left: 4px solid var(--p-red-500);
 }
 
-.exception-text pre {
+.property-value pre {
   margin: 0;
   font-family: inherit;
   font-size: inherit;
   white-space: pre-wrap;
   word-break: break-word;
+  overflow-wrap: break-word;
 }
 
 .no-selection {
