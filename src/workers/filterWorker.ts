@@ -1,5 +1,3 @@
-import { Filters } from "../types";
-
 interface LogEntry {
   timestamp: string;
   level: string;
@@ -7,6 +5,7 @@ interface LogEntry {
   template?: string;
   exception?: string;
   eventId?: string;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   properties?: Record<string, any>;
 }
 
