@@ -49,10 +49,7 @@ function getSelectedEntryIndex(): number {
     </div>
 
     <div class="status-right">
-      <span
-        v-if="loadingMore"
-        class="loading-indicator"
-      >
+      <span v-if="loadingMore" class="loading-indicator">
         <i class="pi pi-spin pi-spinner" />
         Loading more entries...
       </span>

@@ -8,5 +8,3 @@ export default interface LogEntry {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   properties?: Record<string, any>;
 }
-
-

@@ -5,7 +5,6 @@ import Tag from "primevue/tag";
 import Button from "primevue/button";
 import LogEntry from "../types/LogEntry";
 
-
 interface Props {
   selectedEntry?: LogEntry | null;
 }
@@ -72,15 +71,22 @@ async function copyToClipboard(text: string, fieldName: string) {
             <div class="property-value">
               {{ formatTimestamp(selectedEntry.timestamp) }}
             </div>
-            <Button v-tooltip.top="copiedField === 'timestamp' ? 'Copied!' : 'Copy timestamp'
-              " :icon="copiedField === 'timestamp' ? 'pi pi-check' : 'pi pi-copy'"
-              :class="{ 'copy-success': copiedField === 'timestamp' }" size="small" text rounded class="copy-btn"
+            <Button
+              v-tooltip.top="
+                copiedField === 'timestamp' ? 'Copied!' : 'Copy timestamp'
+              "
+              :icon="copiedField === 'timestamp' ? 'pi pi-check' : 'pi pi-copy'"
+              :class="{ 'copy-success': copiedField === 'timestamp' }"
+              size="small"
+              text
+              rounded
+              class="copy-btn"
               @click="
                 copyToClipboard(
                   formatTimestamp(selectedEntry.timestamp),
                   'timestamp',
                 )
-                " />
+              " />
           </div>
         </div>
 
@@ -91,11 +97,18 @@ async function copyToClipboard(text: string, fieldName: string) {
           </div>
           <div class="property-value-container">
             <div class="property-value">
-              <Tag :value="selectedEntry.level" :severity="getLevelSeverity(selectedEntry.level)" />
+              <Tag
+                :value="selectedEntry.level"
+                :severity="getLevelSeverity(selectedEntry.level)" />
             </div>
-            <Button v-tooltip.top="copiedField === 'level' ? 'Copied!' : 'Copy level'"
+            <Button
+              v-tooltip.top="copiedField === 'level' ? 'Copied!' : 'Copy level'"
               :icon="copiedField === 'level' ? 'pi pi-check' : 'pi pi-copy'"
-              :class="{ 'copy-success': copiedField === 'level' }" size="small" text rounded class="copy-btn"
+              :class="{ 'copy-success': copiedField === 'level' }"
+              size="small"
+              text
+              rounded
+              class="copy-btn"
               @click="copyToClipboard(selectedEntry.level, 'level')" />
           </div>
         </div>
@@ -109,9 +122,16 @@ async function copyToClipboard(text: string, fieldName: string) {
             <div class="property-value message-text">
               <pre>{{ selectedEntry.message }}</pre>
             </div>
-            <Button v-tooltip.top="copiedField === 'message' ? 'Copied!' : 'Copy message'
-              " :icon="copiedField === 'message' ? 'pi pi-check' : 'pi pi-copy'"
-              :class="{ 'copy-success': copiedField === 'message' }" size="small" text rounded class="copy-btn"
+            <Button
+              v-tooltip.top="
+                copiedField === 'message' ? 'Copied!' : 'Copy message'
+              "
+              :icon="copiedField === 'message' ? 'pi pi-check' : 'pi pi-copy'"
+              :class="{ 'copy-success': copiedField === 'message' }"
+              size="small"
+              text
+              rounded
+              class="copy-btn"
               @click="copyToClipboard(selectedEntry.message, 'message')" />
           </div>
         </div>
@@ -125,9 +145,16 @@ async function copyToClipboard(text: string, fieldName: string) {
             <div class="property-value">
               {{ selectedEntry.eventId }}
             </div>
-            <Button v-tooltip.top="copiedField === 'eventId' ? 'Copied!' : 'Copy event ID'
-              " :icon="copiedField === 'eventId' ? 'pi pi-check' : 'pi pi-copy'"
-              :class="{ 'copy-success': copiedField === 'eventId' }" size="small" text rounded class="copy-btn"
+            <Button
+              v-tooltip.top="
+                copiedField === 'eventId' ? 'Copied!' : 'Copy event ID'
+              "
+              :icon="copiedField === 'eventId' ? 'pi pi-check' : 'pi pi-copy'"
+              :class="{ 'copy-success': copiedField === 'eventId' }"
+              size="small"
+              text
+              rounded
+              class="copy-btn"
               @click="copyToClipboard(selectedEntry.eventId!, 'eventId')" />
           </div>
         </div>
@@ -141,9 +168,16 @@ async function copyToClipboard(text: string, fieldName: string) {
             <div class="property-value template-text">
               <pre>{{ selectedEntry.template }}</pre>
             </div>
-            <Button v-tooltip.top="copiedField === 'template' ? 'Copied!' : 'Copy template'
-              " :icon="copiedField === 'template' ? 'pi pi-check' : 'pi pi-copy'"
-              :class="{ 'copy-success': copiedField === 'template' }" size="small" text rounded class="copy-btn"
+            <Button
+              v-tooltip.top="
+                copiedField === 'template' ? 'Copied!' : 'Copy template'
+              "
+              :icon="copiedField === 'template' ? 'pi pi-check' : 'pi pi-copy'"
+              :class="{ 'copy-success': copiedField === 'template' }"
+              size="small"
+              text
+              rounded
+              class="copy-btn"
               @click="copyToClipboard(selectedEntry.template!, 'template')" />
           </div>
         </div>
@@ -157,15 +191,24 @@ async function copyToClipboard(text: string, fieldName: string) {
             <div class="property-value json-text">
               <pre>{{ JSON.stringify(selectedEntry.properties, null, 2) }}</pre>
             </div>
-            <Button v-tooltip.top="copiedField === 'properties' ? 'Copied!' : 'Copy properties'
-              " :icon="copiedField === 'properties' ? 'pi pi-check' : 'pi pi-copy'
-                " :class="{ 'copy-success': copiedField === 'properties' }" size="small" text rounded class="copy-btn"
+            <Button
+              v-tooltip.top="
+                copiedField === 'properties' ? 'Copied!' : 'Copy properties'
+              "
+              :icon="
+                copiedField === 'properties' ? 'pi pi-check' : 'pi pi-copy'
+              "
+              :class="{ 'copy-success': copiedField === 'properties' }"
+              size="small"
+              text
+              rounded
+              class="copy-btn"
               @click="
                 copyToClipboard(
                   JSON.stringify(selectedEntry.properties, null, 2),
                   'properties',
                 )
-                " />
+              " />
           </div>
         </div>
 
@@ -178,9 +221,16 @@ async function copyToClipboard(text: string, fieldName: string) {
             <div class="property-value exception-text">
               <pre>{{ selectedEntry.exception }}</pre>
             </div>
-            <Button v-tooltip.top="copiedField === 'exception' ? 'Copied!' : 'Copy exception'
-              " :icon="copiedField === 'exception' ? 'pi pi-check' : 'pi pi-copy'"
-              :class="{ 'copy-success': copiedField === 'exception' }" size="small" text rounded class="copy-btn"
+            <Button
+              v-tooltip.top="
+                copiedField === 'exception' ? 'Copied!' : 'Copy exception'
+              "
+              :icon="copiedField === 'exception' ? 'pi pi-check' : 'pi pi-copy'"
+              :class="{ 'copy-success': copiedField === 'exception' }"
+              size="small"
+              text
+              rounded
+              class="copy-btn"
               @click="copyToClipboard(selectedEntry.exception!, 'exception')" />
           </div>
         </div>

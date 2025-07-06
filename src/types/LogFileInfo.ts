@@ -4,4 +4,3 @@ export default interface LogFileInfo {
   logLevels: string[];
   dateRange?: [string, string];
 }
-

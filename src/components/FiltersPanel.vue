@@ -68,24 +68,40 @@ watch(
     <div class="filters-grid">
       <div class="filter-group">
         <label>Log Level</label>
-        <MultiSelect v-model="selectedLevels" :options="logLevels" placeholder="All Levels" class="filter-control" />
+        <MultiSelect
+          v-model="selectedLevels"
+          :options="logLevels"
+          placeholder="All Levels"
+          class="filter-control" />
       </div>
 
       <div class="filter-group">
         <label>Search Text</label>
-        <InputText v-model="searchText" placeholder="Search messages..." class="filter-control" />
+        <InputText
+          v-model="searchText"
+          placeholder="Search messages..."
+          class="filter-control" />
       </div>
 
       <div class="filter-group">
         <label>Date Range</label>
-        <Calendar v-model="dateRange" selection-mode="range" :show-icon="true" date-format="yy-mm-dd"
+        <Calendar
+          v-model="dateRange"
+          selection-mode="range"
+          :show-icon="true"
+          date-format="yy-mm-dd"
           class="filter-control" />
       </div>
 
       <div class="filter-group">
         <label>Actions</label>
-        <Button v-tooltip.top="'Clear all filters'" icon="pi pi-times" outlined class="filter-control"
-          aria-label="Clear all filters" @click="clearFilters" />
+        <Button
+          v-tooltip.top="'Clear all filters'"
+          icon="pi pi-times"
+          outlined
+          class="filter-control"
+          aria-label="Clear all filters"
+          @click="clearFilters" />
       </div>
     </div>
   </div>

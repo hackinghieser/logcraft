@@ -3,7 +3,6 @@ import Toolbar from "primevue/toolbar";
 import Button from "primevue/button";
 import LogFileInfo from "../types/LogFileInfo";
 
-
 interface Props {
   logFile?: LogFileInfo | null;
 }
@@ -28,13 +27,8 @@ function openSettings() {
   <Toolbar class="app-toolbar">
     <template #start>
       <div class="toolbar-left">
-        <h1 class="app-title">
-          LogCraft
-        </h1>
-        <div
-          v-if="logFile"
-          class="file-info"
-        >
+        <h1 class="app-title">LogCraft</h1>
+        <div v-if="logFile" class="file-info">
           <i class="pi pi-file" />
           {{ logFile.path }} • {{ logFile.totalCount.toLocaleString() }} entries
         </div>
@@ -47,16 +41,14 @@ function openSettings() {
           icon="pi pi-folder-open"
           label="Open File"
           size="small"
-          @click="openFile"
-        />
+          @click="openFile" />
 
         <Button
           icon="pi pi-cog"
           label="Settings"
           text
           size="small"
-          @click="openSettings"
-        />
+          @click="openSettings" />
       </div>
     </template>
   </Toolbar>
