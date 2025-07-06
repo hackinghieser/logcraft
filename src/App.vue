@@ -41,7 +41,7 @@ const loading = ref(false);
 const currentFilters = ref<Filters>({
   selectedLevels: [],
   searchText: "",
-  dateRange: []
+  dateRange: [],
 });
 
 // Pagination state
@@ -51,9 +51,6 @@ const loadingMore = ref(false);
 
 // Sample data for development
 
-
-
-
 // Drag and drop state
 const isDragOver = ref(false);
 
@@ -61,27 +58,27 @@ const isDragOver = ref(false);
 async function handleOpenFile() {
   try {
     // Import Tauri APIs
-    const { open } = await import('@tauri-apps/plugin-dialog');
-    
+    const { open } = await import("@tauri-apps/plugin-dialog");
+
     // Open file dialog
     const selected = await open({
       filters: [
         {
-          name: 'CLEF Log Files',
-          extensions: ['clef', 'log', 'txt']
+          name: "CLEF Log Files",
+          extensions: ["clef", "log", "txt"],
         },
         {
-          name: 'All Files',
-          extensions: ['*']
-        }
-      ]
+          name: "All Files",
+          extensions: ["*"],
+        },
+      ],
     });
 
     if (selected) {
       await handleFileOpen(selected);
     }
   } catch (error) {
-    console.error('Failed to open file dialog:', error);
+    console.error("Failed to open file dialog:", error);
     alert(`Failed to open file dialog: ${error}`);
   }
 }
@@ -89,45 +86,45 @@ async function handleOpenFile() {
 // Tauri file drop handlers using 2.0 API
 async function setupFileDropListener() {
   try {
-    const { getCurrentWebview } = await import('@tauri-apps/api/webview');
-    
+    const { getCurrentWebview } = await import("@tauri-apps/api/webview");
+
     // Set up drag and drop event listener
     const unlisten = await getCurrentWebview().onDragDropEvent((event: any) => {
       switch (event.payload.type) {
-        case 'over':
+        case "over":
           isDragOver.value = true;
           break;
-        case 'drop':
+        case "drop":
           isDragOver.value = false;
           if (event.payload.paths && event.payload.paths.length > 0) {
             handleFileDropped(event.payload.paths[0]);
           }
           break;
-        case 'cancel':
+        case "cancel":
           isDragOver.value = false;
           break;
       }
     });
-    
+
     // Return cleanup function
     return unlisten;
   } catch (error) {
-    console.error('Failed to setup file drop listener:', error);
+    console.error("Failed to setup file drop listener:", error);
     return () => {};
   }
 }
 
 async function handleFileDropped(filePath: string) {
   isDragOver.value = false;
-  
+
   // Check if file is a log file
-  const validExtensions = ['clef', 'log', 'txt'];
-  const fileExtension = filePath.split('.').pop()?.toLowerCase();
-  
+  const validExtensions = ["clef", "log", "txt"];
+  const fileExtension = filePath.split(".").pop()?.toLowerCase();
+
   if (fileExtension && validExtensions.includes(fileExtension)) {
     await handleFileOpen(filePath);
   } else {
-    alert('Please drop a valid log file (.clef, .log, or .txt)');
+    alert("Please drop a valid log file (.clef, .log, or .txt)");
   }
 }
 
@@ -139,23 +136,23 @@ async function loadMoreEntries() {
 
   loadingMore.value = true;
   const currentLogFile = logFile.value; // Store reference to avoid null check issues
-  
+
   // Load in background without blocking UI
   setTimeout(async () => {
     try {
-      const { invoke } = await import('@tauri-apps/api/core');
-      
+      const { invoke } = await import("@tauri-apps/api/core");
+
       const nextPage = currentPage.value + 1;
-      const moreEntries = await invoke('load_log_entries_page', { 
-        filePath: currentLogFile.path, 
-        page: nextPage 
-      }) as LogEntry[];
-      
+      const moreEntries = (await invoke("load_log_entries_page", {
+        filePath: currentLogFile.path,
+        page: nextPage,
+      })) as LogEntry[];
+
       if (moreEntries.length > 0) {
         logEntries.value.push(...moreEntries);
         currentPage.value = nextPage;
         applyFilters(); // Re-apply filters after loading more entries
-        
+
         // Check if we've loaded all entries
         if (logEntries.value.length >= currentLogFile.totalCount) {
           hasMorePages.value = false;
@@ -164,7 +161,7 @@ async function loadMoreEntries() {
         hasMorePages.value = false;
       }
     } catch (error) {
-      console.error('Failed to load more entries:', error);
+      console.error("Failed to load more entries:", error);
     } finally {
       loadingMore.value = false;
     }
@@ -176,35 +173,40 @@ async function handleFileOpen(filePath: string) {
   loading.value = true;
   try {
     // Import Tauri APIs
-    const { invoke } = await import('@tauri-apps/api/core');
-    
+    const { invoke } = await import("@tauri-apps/api/core");
+
     // Reset pagination state
     currentPage.value = 0;
     hasMorePages.value = true;
     loadingMore.value = false;
-    
+
     // Parse the selected file (now returns only first page)
-    const result = await invoke('parse_clef_file', { filePath }) as [any, LogEntry[]];
+    const result = (await invoke("parse_clef_file", { filePath })) as [
+      any,
+      LogEntry[],
+    ];
     const [fileInfo, events] = result;
-    
+
     // Update the application state
     logFile.value = {
       path: fileInfo.path,
       totalCount: fileInfo.total_count,
       logLevels: fileInfo.log_levels,
-      dateRange: fileInfo.date_range
+      dateRange: fileInfo.date_range,
     };
-    
+
     logEntries.value = events;
     applyFilters(); // Apply filters after initial load
     selectedEntry.value = events.length > 0 ? events[0] : null;
-    
+
     // Check if there are more pages to load
     hasMorePages.value = events.length < fileInfo.total_count;
-    
-    console.log(`Loaded first page: ${events.length} of ${fileInfo.total_count} log entries from ${fileInfo.path}`);
+
+    console.log(
+      `Loaded first page: ${events.length} of ${fileInfo.total_count} log entries from ${fileInfo.path}`,
+    );
   } catch (error) {
-    console.error('Failed to parse log file:', error);
+    console.error("Failed to parse log file:", error);
     alert(`Failed to parse log file: ${error}`);
   } finally {
     loading.value = false;
@@ -227,41 +229,47 @@ function applyFilters() {
 
   // Filter by log levels
   if (filters.selectedLevels.length > 0) {
-    filtered = filtered.filter(entry => filters.selectedLevels.includes(entry.level));
+    filtered = filtered.filter((entry) =>
+      filters.selectedLevels.includes(entry.level),
+    );
   }
-  
+
   // Filter by search text
   if (filters.searchText.trim()) {
     const searchTerm = filters.searchText.toLowerCase();
-    filtered = filtered.filter(entry => 
-      entry.message.toLowerCase().includes(searchTerm) ||
-      entry.template?.toLowerCase().includes(searchTerm) ||
-      entry.level.toLowerCase().includes(searchTerm)
+    filtered = filtered.filter(
+      (entry) =>
+        entry.message.toLowerCase().includes(searchTerm) ||
+        entry.template?.toLowerCase().includes(searchTerm) ||
+        entry.level.toLowerCase().includes(searchTerm),
     );
   }
-  
+
   // Filter by date range
   if (filters.dateRange.length === 2) {
     const [startDate, endDate] = filters.dateRange;
-    filtered = filtered.filter(entry => {
+    filtered = filtered.filter((entry) => {
       const entryDate = new Date(entry.timestamp);
       return entryDate >= startDate && entryDate <= endDate;
     });
   }
-  
+
   filteredEntries.value = filtered;
-  
+
   // Reset selection if current selection is not in filtered results
   if (selectedEntry.value && !filtered.includes(selectedEntry.value)) {
     selectedEntry.value = filtered.length > 0 ? filtered[0] : null;
   }
 }
 
-function handleUpdateFilters(filters: { selectedLevels: string[]; searchText: string; dateRange: Date[] }) {
+function handleUpdateFilters(filters: {
+  selectedLevels: string[];
+  searchText: string;
+  dateRange: Date[];
+}) {
   currentFilters.value = filters;
   applyFilters();
 }
-
 
 function handleEntrySelect(entry: LogEntry) {
   selectedEntry.value = entry;
@@ -272,51 +280,51 @@ let isDraggingSplitter = false;
 
 function handleSplitterStart() {
   isDraggingSplitter = true;
-  document.body.classList.add('splitter-dragging');
+  document.body.classList.add("splitter-dragging");
 }
 
 function handleSplitterEnd() {
   isDraggingSplitter = false;
-  document.body.classList.remove('splitter-dragging');
+  document.body.classList.remove("splitter-dragging");
 }
 
 onMounted(async () => {
   // Setup file drop listener
   const cleanupFileDropListener = await setupFileDropListener();
-  
+
   // Add global event listeners for splitter events
-  document.addEventListener('mousedown', (e) => {
-    if ((e.target as HTMLElement)?.closest('.p-splitter-gutter')) {
+  document.addEventListener("mousedown", (e) => {
+    if ((e.target as HTMLElement)?.closest(".p-splitter-gutter")) {
       handleSplitterStart();
     }
   });
-  
-  document.addEventListener('mouseup', () => {
+
+  document.addEventListener("mouseup", () => {
     if (isDraggingSplitter) {
       handleSplitterEnd();
     }
   });
-  
-  document.addEventListener('mouseleave', () => {
+
+  document.addEventListener("mouseleave", () => {
     if (isDraggingSplitter) {
       handleSplitterEnd();
     }
   });
-  
+
   // Additional safety: clear on any click outside splitter
-  document.addEventListener('click', (e) => {
-    if (!(e.target as HTMLElement)?.closest('.p-splitter-gutter')) {
+  document.addEventListener("click", (e) => {
+    if (!(e.target as HTMLElement)?.closest(".p-splitter-gutter")) {
       handleSplitterEnd();
     }
   });
-  
+
   // Store cleanup function for unmount
   (window as any)._cleanupFileDropListener = cleanupFileDropListener;
 });
 
 onUnmounted(() => {
-  document.body.classList.remove('splitter-dragging');
-  
+  document.body.classList.remove("splitter-dragging");
+
   // Cleanup file drop listener
   if ((window as any)._cleanupFileDropListener) {
     (window as any)._cleanupFileDropListener();
@@ -328,12 +336,9 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div 
-    class="app-container"
-    :class="{ 'drag-over': isDragOver }"
-  >
+  <div class="app-container" :class="{ 'drag-over': isDragOver }">
     <!-- Toolbar -->
-    <AppToolbar 
+    <AppToolbar
       :logFile="logFile"
       @openFile="handleOpenFile"
       @toggleTheme="handleToggleTheme"
@@ -341,7 +346,7 @@ onUnmounted(() => {
     />
 
     <!-- Filters Panel -->
-    <FiltersPanel 
+    <FiltersPanel
       :logLevels="logFile?.logLevels || []"
       :initialFilters="currentFilters"
       @updateFilters="handleUpdateFilters"
@@ -352,7 +357,7 @@ onUnmounted(() => {
       <Splitter>
         <!-- Log Table -->
         <SplitterPanel :size="70" :minSize="50">
-          <LogTable 
+          <LogTable
             :logEntries="filteredEntries"
             :selectedEntry="selectedEntry"
             :loading="loading"
@@ -371,7 +376,7 @@ onUnmounted(() => {
     </div>
 
     <!-- Status Bar -->
-    <StatusBar 
+    <StatusBar
       :logFile="logFile"
       :logEntries="filteredEntries"
       :selectedEntry="selectedEntry"
@@ -431,16 +436,23 @@ onUnmounted(() => {
   box-sizing: border-box;
 }
 
-html, body {
+html,
+body {
   height: 100%;
   overflow: hidden;
-  font-family: system-ui, -apple-system, sans-serif;
+  font-family:
+    system-ui,
+    -apple-system,
+    sans-serif;
 }
 
 #app {
   height: 100vh;
   overflow: hidden;
-  font-family: system-ui, -apple-system, sans-serif;
+  font-family:
+    system-ui,
+    -apple-system,
+    sans-serif;
 }
 
 /* Ensure all PrimeVue components use system fonts */

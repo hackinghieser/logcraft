@@ -26,7 +26,7 @@ interface Props {
 const props = withDefaults(defineProps<Props>(), {
   logFile: null,
   selectedEntry: null,
-  loadingMore: false
+  loadingMore: false,
 });
 
 function getSelectedEntryIndex(): number {
@@ -47,7 +47,7 @@ function getSelectedEntryIndex(): number {
         {{ logEntries.length }} filtered
       </span>
     </div>
-    
+
     <div class="status-right">
       <span v-if="loadingMore" class="loading-indicator">
         <i class="pi pi-spin pi-spinner"></i>

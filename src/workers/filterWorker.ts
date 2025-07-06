@@ -1,4 +1,3 @@
-
 import { Filters } from "../types";
 
 interface LogEntry {
@@ -18,17 +17,18 @@ self.onmessage = (event: MessageEvent) => {
   // Filter by log levels
   if (filters.selectedLevels.length > 0) {
     filtered = filtered.filter((entry: LogEntry) =>
-      filters.selectedLevels.includes(entry.level)
+      filters.selectedLevels.includes(entry.level),
     );
   }
 
   // Filter by search text
   if (filters.searchText.trim()) {
     const searchTerm = filters.searchText.toLowerCase();
-    filtered = filtered.filter((entry: LogEntry) =>
-      entry.message.toLowerCase().includes(searchTerm) ||
-      entry.template?.toLowerCase().includes(searchTerm) ||
-      entry.level.toLowerCase().includes(searchTerm)
+    filtered = filtered.filter(
+      (entry: LogEntry) =>
+        entry.message.toLowerCase().includes(searchTerm) ||
+        entry.template?.toLowerCase().includes(searchTerm) ||
+        entry.level.toLowerCase().includes(searchTerm),
     );
   }
 

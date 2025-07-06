@@ -28,7 +28,7 @@ const props = withDefaults(defineProps<Props>(), {
   selectedEntry: null,
   loading: false,
   hasMorePages: false,
-  loadingMore: false
+  loadingMore: false,
 });
 
 const emit = defineEmits<{
@@ -37,20 +37,27 @@ const emit = defineEmits<{
 }>();
 
 function onRowSelect(event: any) {
-  emit('entrySelect', event.data);
+  emit("entrySelect", event.data);
 }
 
 function formatTimestamp(timestamp: string): string {
   return new Date(timestamp).toLocaleString();
 }
 
-function getLevelSeverity(level: string): "success" | "info" | "warning" | "danger" {
+function getLevelSeverity(
+  level: string,
+): "success" | "info" | "warning" | "danger" {
   switch (level.toLowerCase()) {
-    case "error": return "danger";
-    case "warning": return "warning";
-    case "information": return "info";
-    case "debug": return "success";
-    default: return "info";
+    case "error":
+      return "danger";
+    case "warning":
+      return "warning";
+    case "information":
+      return "info";
+    case "debug":
+      return "success";
+    default:
+      return "info";
   }
 }
 
@@ -64,9 +71,12 @@ function handleScroll(event: Event) {
 
   const element = event.target as HTMLElement;
   const threshold = 200; // Trigger load when 200px from bottom (earlier)
-  
-  if (element.scrollTop + element.clientHeight >= element.scrollHeight - threshold) {
-    emit('loadMore');
+
+  if (
+    element.scrollTop + element.clientHeight >=
+    element.scrollHeight - threshold
+  ) {
+    emit("loadMore");
   }
 }
 
@@ -75,56 +85,63 @@ let scrollElement: HTMLElement | null = null;
 const setupScrollListener = async () => {
   // Wait for the DOM to be fully updated
   await nextTick();
-  
+
   // Remove existing listener if any
   if (scrollElement) {
-    scrollElement.removeEventListener('scroll', handleScroll);
+    scrollElement.removeEventListener("scroll", handleScroll);
     scrollElement = null;
   }
-  
+
   // Method 1: Via DataTable ref
   if (dataTableRef.value && dataTableRef.value.$el) {
-    const wrapper = dataTableRef.value.$el.querySelector('.p-datatable-wrapper');
+    const wrapper = dataTableRef.value.$el.querySelector(
+      ".p-datatable-wrapper",
+    );
     if (wrapper) {
       scrollElement = wrapper as HTMLElement;
-      wrapper.addEventListener('scroll', handleScroll, { passive: true });
+      wrapper.addEventListener("scroll", handleScroll, { passive: true });
       return true;
     }
   }
-  
+
   // Method 2: Direct class search
-  const wrapper = document.querySelector('.p-datatable-wrapper');
+  const wrapper = document.querySelector(".p-datatable-wrapper");
   if (wrapper) {
     scrollElement = wrapper as HTMLElement;
-    wrapper.addEventListener('scroll', handleScroll, { passive: true });
+    wrapper.addEventListener("scroll", handleScroll, { passive: true });
     return true;
   }
-  
+
   // Method 3: Look for any element with overflow
-  const scrollables = document.querySelectorAll('[style*="overflow"], .p-datatable-wrapper');
+  const scrollables = document.querySelectorAll(
+    '[style*="overflow"], .p-datatable-wrapper',
+  );
   for (const element of scrollables) {
     const styles = window.getComputedStyle(element);
-    if (styles.overflow === 'auto' || styles.overflowY === 'auto') {
+    if (styles.overflow === "auto" || styles.overflowY === "auto") {
       scrollElement = element as HTMLElement;
-      element.addEventListener('scroll', handleScroll, { passive: true });
+      element.addEventListener("scroll", handleScroll, { passive: true });
       return true;
     }
   }
-  
+
   return false;
 };
 
 // Watch for when logEntries change (data is loaded) and setup scroll listener
-watch(() => props.logEntries.length, async (newLength) => {
-  if (newLength > 0) {
-    await setupScrollListener();
-  }
-});
+watch(
+  () => props.logEntries.length,
+  async (newLength) => {
+    if (newLength > 0) {
+      await setupScrollListener();
+    }
+  },
+);
 
 onMounted(async () => {
   // Try multiple times with different delays
   for (let attempt = 0; attempt < 5; attempt++) {
-    await new Promise(resolve => setTimeout(resolve, attempt * 200));
+    await new Promise((resolve) => setTimeout(resolve, attempt * 200));
     if (await setupScrollListener()) {
       break;
     }
@@ -133,7 +150,7 @@ onMounted(async () => {
 
 onUnmounted(() => {
   if (scrollElement) {
-    scrollElement.removeEventListener('scroll', handleScroll);
+    scrollElement.removeEventListener("scroll", handleScroll);
     scrollElement = null;
   }
 });
@@ -147,7 +164,7 @@ onUnmounted(() => {
         Log Entries
       </div>
     </template>
-    
+
     <template #content>
       <div v-if="loading" class="loading-overlay">
         <div class="loading-container">
@@ -159,7 +176,7 @@ onUnmounted(() => {
           <p class="loading-text">Loading log entries...</p>
         </div>
       </div>
-      
+
       <DataTable
         v-else
         ref="dataTableRef"
@@ -171,15 +188,25 @@ onUnmounted(() => {
         scrollHeight="flex"
         class="logs-table"
       >
-        <Column field="timestamp" header="Timestamp" :sortable="true" style="width: 200px">
+        <Column
+          field="timestamp"
+          header="Timestamp"
+          :sortable="true"
+          style="width: 200px"
+        >
           <template #body="slotProps">
             <span class="timestamp">
               {{ formatTimestamp(slotProps.data.timestamp) }}
             </span>
           </template>
         </Column>
-        
-        <Column field="level" header="Level" :sortable="true" style="width: 100px">
+
+        <Column
+          field="level"
+          header="Level"
+          :sortable="true"
+          style="width: 100px"
+        >
           <template #body="slotProps">
             <Tag
               :value="slotProps.data.level"
@@ -188,13 +215,13 @@ onUnmounted(() => {
             />
           </template>
         </Column>
-        
+
         <Column field="message" header="Message" :sortable="true">
           <template #body="slotProps">
             <span class="message-text">{{ slotProps.data.message }}</span>
           </template>
         </Column>
-        
+
         <Column header="Actions" style="width: 80px">
           <template #body>
             <Button
@@ -207,7 +234,7 @@ onUnmounted(() => {
           </template>
         </Column>
       </DataTable>
-      
+
       <!-- Loading More Indicator -->
       <div v-if="loadingMore" class="loading-more-container">
         <div class="loading-more-spinner">

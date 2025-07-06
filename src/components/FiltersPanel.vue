@@ -21,23 +21,23 @@ const props = withDefaults(defineProps<Props>(), {
   initialFilters: () => ({
     selectedLevels: [],
     searchText: "",
-    dateRange: []
-  })
+    dateRange: [],
+  }),
 });
 
 const emit = defineEmits<{
-  updateFilters: [filters: {
-    selectedLevels: string[];
-    searchText: string;
-    dateRange: Date[];
-  }];
+  updateFilters: [
+    filters: {
+      selectedLevels: string[];
+      searchText: string;
+      dateRange: Date[];
+    },
+  ];
 }>();
 
 const selectedLevels = ref<string[]>(props.initialFilters.selectedLevels);
 const searchText = ref(props.initialFilters.searchText);
 const dateRange = ref<Date[]>(props.initialFilters.dateRange);
-
-
 
 function clearFilters() {
   selectedLevels.value = [];
@@ -46,18 +46,21 @@ function clearFilters() {
 }
 
 function emitFilters() {
-  emit('updateFilters', {
+  emit("updateFilters", {
     selectedLevels: selectedLevels.value,
     searchText: searchText.value,
-    dateRange: dateRange.value
+    dateRange: dateRange.value,
   });
 }
 
 // Watch for changes and emit
-watch([selectedLevels, searchText, dateRange], () => {
-  emitFilters();
-}, { deep: true });
-
+watch(
+  [selectedLevels, searchText, dateRange],
+  () => {
+    emitFilters();
+  },
+  { deep: true },
+);
 </script>
 
 <template>
@@ -72,7 +75,7 @@ watch([selectedLevels, searchText, dateRange], () => {
           class="filter-control"
         />
       </div>
-      
+
       <div class="filter-group">
         <label>Search Text</label>
         <InputText
@@ -81,7 +84,7 @@ watch([selectedLevels, searchText, dateRange], () => {
           class="filter-control"
         />
       </div>
-      
+
       <div class="filter-group">
         <label>Date Range</label>
         <Calendar
@@ -92,7 +95,7 @@ watch([selectedLevels, searchText, dateRange], () => {
           class="filter-control"
         />
       </div>
-      
+
       <div class="filter-group">
         <label>Actions</label>
         <Button

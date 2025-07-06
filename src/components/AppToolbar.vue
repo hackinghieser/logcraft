@@ -1,5 +1,4 @@
 <script setup lang="ts">
-
 import Toolbar from "primevue/toolbar";
 import Button from "primevue/button";
 
@@ -22,16 +21,12 @@ const emit = defineEmits<{
 }>();
 
 async function openFile() {
-  emit('openFile');
+  emit("openFile");
 }
-
-
 
 function openSettings() {
-  emit('openSettings');
+  emit("openSettings");
 }
-
-
 </script>
 
 <template>
@@ -45,13 +40,23 @@ function openSettings() {
         </div>
       </div>
     </template>
-    
+
     <template #end>
       <div class="toolbar-right">
-        <Button icon="pi pi-folder-open" label="Open File" @click="openFile" size="small" />
-        
-        <Button icon="pi pi-cog" label="Settings" text @click="openSettings" size="small" />
-        
+        <Button
+          icon="pi pi-folder-open"
+          label="Open File"
+          @click="openFile"
+          size="small"
+        />
+
+        <Button
+          icon="pi pi-cog"
+          label="Settings"
+          text
+          @click="openSettings"
+          size="small"
+        />
       </div>
     </template>
   </Toolbar>
