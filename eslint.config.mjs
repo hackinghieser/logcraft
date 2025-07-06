@@ -1,12 +1,15 @@
 // @ts-check
-
-import eslint from "@eslint/js";
-import tseslint from "typescript-eslint";
-
-export default tseslint.config(
+import pluginVue from "eslint-plugin-vue"
+import {
+  defineConfigWithVueTs,
+  vueTsConfigs
+} from '@vue/eslint-config-typescript'
+export default defineConfigWithVueTs(
+  pluginVue.configs['flat/recommended'],
+  vueTsConfigs.recommended,
   {
-    ignores: ["src-tauri/*", "dist/*"],
-  },
-  eslint.configs.recommended,
-  tseslint.configs.recommended,
+    ignores: ["src-tauri/*", "dist/*", 'src/vite-env.d.ts'],
+  }
 );
+
+

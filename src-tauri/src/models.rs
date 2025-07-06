@@ -1,5 +1,5 @@
-use serde::{Deserialize, Serialize};
 use cleverlib::event::Event;
+use serde::{Deserialize, Serialize};
 
 /// Wrapper struct for Tauri IPC (cleverlib's Event doesn't implement Serialize)
 #[derive(Serialize, Deserialize, Debug)]
@@ -43,7 +43,7 @@ impl From<(&Event, &str)> for SerializableEvent {
                         } else {
                             Some(serde_json::Value::Object(map))
                         }
-                    },
+                    }
                     _ => None, // Not a JSON object or parsing failed
                 }
             }
@@ -51,7 +51,10 @@ impl From<(&Event, &str)> for SerializableEvent {
 
         SerializableEvent {
             timestamp: event.time.clone().unwrap_or_else(|| "Unknown".to_string()),
-            level: event.level.clone().unwrap_or_else(|| "Information".to_string()),
+            level: event
+                .level
+                .clone()
+                .unwrap_or_else(|| "Information".to_string()),
             template: if event.template != message && !event.template.is_empty() {
                 Some(event.template.clone())
             } else {
@@ -73,3 +76,4 @@ pub struct LogFileInfo {
     pub log_levels: Vec<String>,
     pub date_range: Option<(String, String)>,
 }
+

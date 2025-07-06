@@ -39,22 +39,25 @@ function getSelectedEntryIndex(): number {
   <div class="status-bar">
     <div class="status-left">
       <span v-if="logFile">
-        <i class="pi pi-chart-bar"></i>
+        <i class="pi pi-chart-bar" />
         {{ logFile.totalCount.toLocaleString() }} total entries
       </span>
       <span v-if="logEntries.length !== logFile?.totalCount">
-        <i class="pi pi-search"></i>
+        <i class="pi pi-search" />
         {{ logEntries.length }} filtered
       </span>
     </div>
 
     <div class="status-right">
-      <span v-if="loadingMore" class="loading-indicator">
-        <i class="pi pi-spin pi-spinner"></i>
+      <span
+        v-if="loadingMore"
+        class="loading-indicator"
+      >
+        <i class="pi pi-spin pi-spinner" />
         Loading more entries...
       </span>
       <span v-else-if="selectedEntry">
-        <i class="pi pi-map-marker"></i>
+        <i class="pi pi-map-marker" />
         Entry {{ getSelectedEntryIndex() + 1 }} of {{ logEntries.length }}
       </span>
     </div>

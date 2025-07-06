@@ -11,24 +11,9 @@ import DetailsPanel from "./components/DetailsPanel.vue";
 import StatusBar from "./components/StatusBar.vue";
 
 import { Filters } from "./types";
+import LogEntry from "./types/LogEntry";
+import LogFileInfo from "./types/LogFileInfo";
 
-// Types
-interface LogEntry {
-  timestamp: string;
-  level: string;
-  message: string;
-  template?: string;
-  exception?: string;
-  eventId?: string;
-  properties?: Record<string, any>;
-}
-
-interface LogFileInfo {
-  path: string;
-  totalCount: number;
-  logLevels: string[];
-  dateRange?: [string, string];
-}
 
 // Reactive data
 const logFile = ref<LogFileInfo | null>(null);
@@ -110,7 +95,7 @@ async function setupFileDropListener() {
     return unlisten;
   } catch (error) {
     console.error("Failed to setup file drop listener:", error);
-    return () => {};
+    return () => { };
   }
 }
 
@@ -330,58 +315,39 @@ onUnmounted(() => {
     (window as any)._cleanupFileDropListener();
   }
 
-  // Terminate the worker when the component is unmounted
-  filterWorker.terminate();
 });
 </script>
 
 <template>
   <div class="app-container" :class="{ 'drag-over': isDragOver }">
     <!-- Toolbar -->
-    <AppToolbar
-      :logFile="logFile"
-      @openFile="handleOpenFile"
-      @toggleTheme="handleToggleTheme"
-      @openSettings="handleOpenSettings"
-    />
+    <AppToolbar :log-file="logFile" @open-file="handleOpenFile" @toggle-theme="handleToggleTheme"
+      @open-settings="handleOpenSettings" />
 
     <!-- Filters Panel -->
-    <FiltersPanel
-      :logLevels="logFile?.logLevels || []"
-      :initialFilters="currentFilters"
-      @updateFilters="handleUpdateFilters"
-    />
+    <FiltersPanel :log-levels="logFile?.logLevels || []" :initial-filters="currentFilters"
+      @update-filters="handleUpdateFilters" />
 
     <!-- Main Content -->
     <div class="main-content">
       <Splitter>
         <!-- Log Table -->
-        <SplitterPanel :size="70" :minSize="50">
-          <LogTable
-            :logEntries="filteredEntries"
-            :selectedEntry="selectedEntry"
-            :loading="loading"
-            :hasMorePages="hasMorePages"
-            :loadingMore="loadingMore"
-            @entrySelect="handleEntrySelect"
-            @loadMore="loadMoreEntries"
-          />
+        <SplitterPanel :size="70" :min-size="50">
+          <LogTable :log-entries="filteredEntries" :selected-entry="selectedEntry" :loading="loading"
+            :has-more-pages="hasMorePages" :loading-more="loadingMore" @entry-select="handleEntrySelect"
+            @load-more="loadMoreEntries" />
         </SplitterPanel>
 
         <!-- Details Panel -->
-        <SplitterPanel :size="30" :minSize="25">
-          <DetailsPanel :selectedEntry="selectedEntry" />
+        <SplitterPanel :size="30" :min-size="25">
+          <DetailsPanel :selected-entry="selectedEntry" />
         </SplitterPanel>
       </Splitter>
     </div>
 
     <!-- Status Bar -->
-    <StatusBar
-      :logFile="logFile"
-      :logEntries="filteredEntries"
-      :selectedEntry="selectedEntry"
-      :loadingMore="loadingMore"
-    />
+    <StatusBar :log-file="logFile" :log-entries="filteredEntries" :selected-entry="selectedEntry"
+      :loading-more="loadingMore" />
   </div>
 </template>
 
@@ -542,14 +508,14 @@ body.splitter-dragging .p-splitter-gutter {
   border: none;
 }
 
-.p-datatable .p-datatable-tbody > tr {
+.p-datatable .p-datatable-tbody>tr {
   background: transparent;
   height: 32px;
   transition: all 0.2s ease;
   border-bottom: 1px solid var(--p-surface-border);
 }
 
-.p-datatable .p-datatable-tbody > tr td {
+.p-datatable .p-datatable-tbody>tr td {
   padding: 6px 0;
   font-size: 13px;
   line-height: 1.3;
@@ -559,24 +525,24 @@ body.splitter-dragging .p-splitter-gutter {
   vertical-align: middle;
 }
 
-.p-datatable .p-datatable-tbody > tr td:first-child {
+.p-datatable .p-datatable-tbody>tr td:first-child {
   padding-left: 12px;
 }
 
-.p-datatable .p-datatable-tbody > tr td:last-child {
+.p-datatable .p-datatable-tbody>tr td:last-child {
   padding-right: 12px;
 }
 
-.p-datatable .p-datatable-tbody > tr:hover {
+.p-datatable .p-datatable-tbody>tr:hover {
   background: var(--p-surface-hover);
 }
 
-.p-datatable .p-datatable-tbody > tr.p-highlight {
+.p-datatable .p-datatable-tbody>tr.p-highlight {
   background: var(--p-primary-50);
   border-left: 3px solid var(--p-primary-500);
 }
 
-.p-datatable .p-datatable-thead > tr > th {
+.p-datatable .p-datatable-thead>tr>th {
   padding: 10px 0;
   font-size: 12px;
   font-weight: 600;
@@ -587,11 +553,11 @@ body.splitter-dragging .p-splitter-gutter {
   letter-spacing: 0.5px;
 }
 
-.p-datatable .p-datatable-thead > tr > th:first-child {
+.p-datatable .p-datatable-thead>tr>th:first-child {
   padding-left: 12px;
 }
 
-.p-datatable .p-datatable-thead > tr > th:last-child {
+.p-datatable .p-datatable-thead>tr>th:last-child {
   padding-right: 12px;
 }
 

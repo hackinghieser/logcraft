@@ -1,20 +1,12 @@
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted, nextTick, watch } from "vue";
-import DataTable from "primevue/datatable";
+import DataTable, { DataTableRowClickEvent } from "primevue/datatable";
 import Column from "primevue/column";
 import Button from "primevue/button";
 import Card from "primevue/card";
 import Tag from "primevue/tag";
+import LogEntry from "../types/LogEntry";
 
-interface LogEntry {
-  timestamp: string;
-  level: string;
-  message: string;
-  template?: string;
-  exception?: string;
-  eventId?: string;
-  properties?: Record<string, any>;
-}
 
 interface Props {
   logEntries: LogEntry[];
@@ -36,7 +28,7 @@ const emit = defineEmits<{
   loadMore: [];
 }>();
 
-function onRowSelect(event: any) {
+function onRowSelect(event: DataTableRowClickEvent) {
   emit("entrySelect", event.data);
 }
 
@@ -160,7 +152,7 @@ onUnmounted(() => {
   <Card class="logs-table-card">
     <template #title>
       <div class="table-header">
-        <i class="pi pi-list"></i>
+        <i class="pi pi-list" />
         Log Entries
       </div>
     </template>
@@ -169,31 +161,19 @@ onUnmounted(() => {
       <div v-if="loading" class="loading-overlay">
         <div class="loading-container">
           <div class="loading-spinner">
-            <div class="spinner-ring"></div>
-            <div class="spinner-ring"></div>
-            <div class="spinner-ring"></div>
+            <div class="spinner-ring" />
+            <div class="spinner-ring" />
+            <div class="spinner-ring" />
           </div>
-          <p class="loading-text">Loading log entries...</p>
+          <p class="loading-text">
+            Loading log entries...
+          </p>
         </div>
       </div>
 
-      <DataTable
-        v-else
-        ref="dataTableRef"
-        :value="logEntries"
-        :selection="selectedEntry"
-        selectionMode="single"
-        @row-select="onRowSelect"
-        scrollable
-        scrollHeight="flex"
-        class="logs-table"
-      >
-        <Column
-          field="timestamp"
-          header="Timestamp"
-          :sortable="true"
-          style="width: 200px"
-        >
+      <DataTable v-else ref="dataTableRef" :value="logEntries" :selection="selectedEntry" selection-mode="single"
+        scrollable scroll-height="flex" class="logs-table" @row-select="onRowSelect">
+        <Column field="timestamp" header="Timestamp" :sortable="true" style="width: 200px">
           <template #body="slotProps">
             <span class="timestamp">
               {{ formatTimestamp(slotProps.data.timestamp) }}
@@ -201,18 +181,9 @@ onUnmounted(() => {
           </template>
         </Column>
 
-        <Column
-          field="level"
-          header="Level"
-          :sortable="true"
-          style="width: 100px"
-        >
+        <Column field="level" header="Level" :sortable="true" style="width: 100px">
           <template #body="slotProps">
-            <Tag
-              :value="slotProps.data.level"
-              :severity="getLevelSeverity(slotProps.data.level)"
-              class="level-tag"
-            />
+            <Tag :value="slotProps.data.level" :severity="getLevelSeverity(slotProps.data.level)" class="level-tag" />
           </template>
         </Column>
 
@@ -224,13 +195,7 @@ onUnmounted(() => {
 
         <Column header="Actions" style="width: 80px">
           <template #body>
-            <Button
-              icon="pi pi-eye"
-              size="small"
-              text
-              rounded
-              aria-label="View Details"
-            />
+            <Button icon="pi pi-eye" size="small" text rounded aria-label="View Details" />
           </template>
         </Column>
       </DataTable>
@@ -238,9 +203,11 @@ onUnmounted(() => {
       <!-- Loading More Indicator -->
       <div v-if="loadingMore" class="loading-more-container">
         <div class="loading-more-spinner">
-          <div class="spinner-ring"></div>
+          <div class="spinner-ring" />
         </div>
-        <p class="loading-more-text">Loading more entries...</p>
+        <p class="loading-more-text">
+          Loading more entries...
+        </p>
       </div>
     </template>
   </Card>
@@ -360,6 +327,7 @@ onUnmounted(() => {
   0% {
     transform: rotate(0deg);
   }
+
   100% {
     transform: rotate(360deg);
   }
