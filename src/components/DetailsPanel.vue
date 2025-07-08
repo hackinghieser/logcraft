@@ -61,10 +61,7 @@ async function copyToClipboard(text: string, fieldName: string) {
     </template>
 
     <template #content>
-      <div
-        v-if="selectedEntry"
-        class="details-content"
-      >
+      <div v-if="selectedEntry" class="details-content">
         <div class="property-group">
           <div class="property-title">
             <i class="pi pi-clock" />
@@ -89,8 +86,7 @@ async function copyToClipboard(text: string, fieldName: string) {
                   formatTimestamp(selectedEntry.timestamp),
                   'timestamp',
                 )
-              "
-            />
+              " />
           </div>
         </div>
 
@@ -103,8 +99,7 @@ async function copyToClipboard(text: string, fieldName: string) {
             <div class="property-value">
               <Tag
                 :value="selectedEntry.level"
-                :severity="getLevelSeverity(selectedEntry.level)"
-              />
+                :severity="getLevelSeverity(selectedEntry.level)" />
             </div>
             <Button
               v-tooltip.top="copiedField === 'level' ? 'Copied!' : 'Copy level'"
@@ -114,8 +109,7 @@ async function copyToClipboard(text: string, fieldName: string) {
               text
               rounded
               class="copy-btn"
-              @click="copyToClipboard(selectedEntry.level, 'level')"
-            />
+              @click="copyToClipboard(selectedEntry.level, 'level')" />
           </div>
         </div>
 
@@ -138,15 +132,11 @@ async function copyToClipboard(text: string, fieldName: string) {
               text
               rounded
               class="copy-btn"
-              @click="copyToClipboard(selectedEntry.message, 'message')"
-            />
+              @click="copyToClipboard(selectedEntry.message, 'message')" />
           </div>
         </div>
 
-        <div
-          v-if="selectedEntry.eventId"
-          class="property-group"
-        >
+        <div v-if="selectedEntry.eventId" class="property-group">
           <div class="property-title">
             <i class="pi pi-key" />
             Event ID
@@ -165,21 +155,17 @@ async function copyToClipboard(text: string, fieldName: string) {
               text
               rounded
               class="copy-btn"
-              @click="copyToClipboard(selectedEntry.eventId!, 'eventId')"
-            />
+              @click="copyToClipboard(selectedEntry.eventId!, 'eventId')" />
           </div>
         </div>
 
-        <div
-          v-if="selectedEntry.template"
-          class="property-group"
-        >
+        <div v-if="selectedEntry.template" class="property-group">
           <div class="property-title">
             <i class="pi pi-file-edit" />
             Message Template
           </div>
           <div class="property-value-container">
-            <div class="property-value template-text">
+            <div class="property-value">
               <pre>{{ selectedEntry.template }}</pre>
             </div>
             <Button
@@ -192,21 +178,17 @@ async function copyToClipboard(text: string, fieldName: string) {
               text
               rounded
               class="copy-btn"
-              @click="copyToClipboard(selectedEntry.template!, 'template')"
-            />
+              @click="copyToClipboard(selectedEntry.template!, 'template')" />
           </div>
         </div>
 
-        <div
-          v-if="selectedEntry.properties"
-          class="property-group"
-        >
+        <div v-if="selectedEntry.properties" class="property-group">
           <div class="property-title">
             <i class="pi pi-cog" />
             Properties
           </div>
           <div class="property-value-container">
-            <div class="property-value json-text">
+            <div class="property-value">
               <pre>{{ JSON.stringify(selectedEntry.properties, null, 2) }}</pre>
             </div>
             <Button
@@ -226,21 +208,17 @@ async function copyToClipboard(text: string, fieldName: string) {
                   JSON.stringify(selectedEntry.properties, null, 2),
                   'properties',
                 )
-              "
-            />
+              " />
           </div>
         </div>
 
-        <div
-          v-if="selectedEntry.exception"
-          class="property-group"
-        >
+        <div v-if="selectedEntry.exception" class="property-group">
           <div class="property-title">
             <i class="pi pi-exclamation-triangle" />
             Exception
           </div>
           <div class="property-value-container">
-            <div class="property-value exception-text">
+            <div class="property-value">
               <pre>{{ selectedEntry.exception }}</pre>
             </div>
             <Button
@@ -253,16 +231,12 @@ async function copyToClipboard(text: string, fieldName: string) {
               text
               rounded
               class="copy-btn"
-              @click="copyToClipboard(selectedEntry.exception!, 'exception')"
-            />
+              @click="copyToClipboard(selectedEntry.exception!, 'exception')" />
           </div>
         </div>
       </div>
 
-      <div
-        v-else
-        class="no-selection"
-      >
+      <div v-else class="no-selection">
         <i class="pi pi-info-circle" />
         <p>Select a log entry to view details</p>
       </div>
@@ -359,21 +333,6 @@ async function copyToClipboard(text: string, fieldName: string) {
   font-size: 13px;
   word-break: break-word;
   color: var(--p-text-color);
-}
-
-.template-text {
-  background: var(--p-primary-50);
-  border-left: 4px solid var(--p-primary-color);
-}
-
-.json-text {
-  background: var(--p-surface-100);
-  border-left: 4px solid var(--p-text-muted-color);
-}
-
-.exception-text {
-  background: var(--p-red-50);
-  border-left: 4px solid var(--p-red-500);
 }
 
 .property-value pre {
