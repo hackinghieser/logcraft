@@ -10,10 +10,9 @@ import LogTable from "./components/LogTable.vue";
 import DetailsPanel from "./components/DetailsPanel.vue";
 import StatusBar from "./components/StatusBar.vue";
 
-import { Filters } from "./types";
+import { Filters } from "./types/Filters";
 import LogEntry from "./types/LogEntry";
 import LogFileInfo from "./types/LogFileInfo";
-
 
 // Reactive data
 const logFile = ref<LogFileInfo | null>(null);
@@ -95,7 +94,7 @@ async function setupFileDropListener() {
     return unlisten;
   } catch (error) {
     console.error("Failed to setup file drop listener:", error);
-    return () => { };
+    return () => {};
   }
 }
 
@@ -314,38 +313,29 @@ onUnmounted(() => {
   if ((window as any)._cleanupFileDropListener) {
     (window as any)._cleanupFileDropListener();
   }
-
 });
 </script>
 
 <template>
-  <div
-    class="app-container"
-    :class="{ 'drag-over': isDragOver }"
-  >
+  <div class="app-container" :class="{ 'drag-over': isDragOver }">
     <!-- Toolbar -->
     <AppToolbar
       :log-file="logFile"
       @open-file="handleOpenFile"
       @toggle-theme="handleToggleTheme"
-      @open-settings="handleOpenSettings"
-    />
+      @open-settings="handleOpenSettings" />
 
     <!-- Filters Panel -->
     <FiltersPanel
       :log-levels="logFile?.logLevels || []"
       :initial-filters="currentFilters"
-      @update-filters="handleUpdateFilters"
-    />
+      @update-filters="handleUpdateFilters" />
 
     <!-- Main Content -->
     <div class="main-content">
       <Splitter>
         <!-- Log Table -->
-        <SplitterPanel
-          :size="70"
-          :min-size="50"
-        >
+        <SplitterPanel :size="70" :min-size="50">
           <LogTable
             :log-entries="filteredEntries"
             :selected-entry="selectedEntry"
@@ -353,15 +343,11 @@ onUnmounted(() => {
             :has-more-pages="hasMorePages"
             :loading-more="loadingMore"
             @entry-select="handleEntrySelect"
-            @load-more="loadMoreEntries"
-          />
+            @load-more="loadMoreEntries" />
         </SplitterPanel>
 
         <!-- Details Panel -->
-        <SplitterPanel
-          :size="30"
-          :min-size="25"
-        >
+        <SplitterPanel :size="30" :min-size="25">
           <DetailsPanel :selected-entry="selectedEntry" />
         </SplitterPanel>
       </Splitter>
@@ -372,8 +358,7 @@ onUnmounted(() => {
       :log-file="logFile"
       :log-entries="filteredEntries"
       :selected-entry="selectedEntry"
-      :loading-more="loadingMore"
-    />
+      :loading-more="loadingMore" />
   </div>
 </template>
 
@@ -534,14 +519,14 @@ body.splitter-dragging .p-splitter-gutter {
   border: none;
 }
 
-.p-datatable .p-datatable-tbody>tr {
+.p-datatable .p-datatable-tbody > tr {
   background: transparent;
   height: 32px;
   transition: all 0.2s ease;
   border-bottom: 1px solid var(--p-surface-border);
 }
 
-.p-datatable .p-datatable-tbody>tr td {
+.p-datatable .p-datatable-tbody > tr td {
   padding: 6px 0;
   font-size: 13px;
   line-height: 1.3;
@@ -551,24 +536,24 @@ body.splitter-dragging .p-splitter-gutter {
   vertical-align: middle;
 }
 
-.p-datatable .p-datatable-tbody>tr td:first-child {
+.p-datatable .p-datatable-tbody > tr td:first-child {
   padding-left: 12px;
 }
 
-.p-datatable .p-datatable-tbody>tr td:last-child {
+.p-datatable .p-datatable-tbody > tr td:last-child {
   padding-right: 12px;
 }
 
-.p-datatable .p-datatable-tbody>tr:hover {
+.p-datatable .p-datatable-tbody > tr:hover {
   background: var(--p-surface-hover);
 }
 
-.p-datatable .p-datatable-tbody>tr.p-highlight {
+.p-datatable .p-datatable-tbody > tr.p-highlight {
   background: var(--p-primary-50);
   border-left: 3px solid var(--p-primary-500);
 }
 
-.p-datatable .p-datatable-thead>tr>th {
+.p-datatable .p-datatable-thead > tr > th {
   padding: 10px 0;
   font-size: 12px;
   font-weight: 600;
@@ -579,11 +564,11 @@ body.splitter-dragging .p-splitter-gutter {
   letter-spacing: 0.5px;
 }
 
-.p-datatable .p-datatable-thead>tr>th:first-child {
+.p-datatable .p-datatable-thead > tr > th:first-child {
   padding-left: 12px;
 }
 
-.p-datatable .p-datatable-thead>tr>th:last-child {
+.p-datatable .p-datatable-thead > tr > th:last-child {
   padding-right: 12px;
 }
 

@@ -32,13 +32,8 @@ function toggleTheme() {
   <Toolbar class="app-toolbar">
     <template #start>
       <div class="toolbar-left">
-        <h1 class="app-title">
-          LogCraft
-        </h1>
-        <div
-          v-if="logFile"
-          class="file-info"
-        >
+        <h1 class="app-title">LogCraft</h1>
+        <div v-if="logFile" class="file-info">
           <i class="pi pi-file" />
           {{ logFile.path }} • {{ logFile.totalCount.toLocaleString() }} entries
         </div>
@@ -51,8 +46,7 @@ function toggleTheme() {
           icon="pi pi-folder-open"
           label="Open File"
           size="small"
-          @click="openFile"
-        />
+          @click="openFile" />
 
         <Button
           icon="pi pi-moon"
@@ -60,16 +54,14 @@ function toggleTheme() {
           text
           size="small"
           aria-label="Toggle theme"
-          @click="toggleTheme"
-        />
+          @click="toggleTheme" />
 
         <Button
           icon="pi pi-cog"
           label="Settings"
           text
           size="small"
-          @click="openSettings"
-        />
+          @click="openSettings" />
       </div>
     </template>
   </Toolbar>

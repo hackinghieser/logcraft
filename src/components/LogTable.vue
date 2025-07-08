@@ -157,19 +157,14 @@ onUnmounted(() => {
     </template>
 
     <template #content>
-      <div
-        v-if="loading"
-        class="loading-overlay"
-      >
+      <div v-if="loading" class="loading-overlay">
         <div class="loading-container">
           <div class="loading-spinner">
             <div class="spinner-ring" />
             <div class="spinner-ring" />
             <div class="spinner-ring" />
           </div>
-          <p class="loading-text">
-            Loading log entries...
-          </p>
+          <p class="loading-text">Loading log entries...</p>
         </div>
       </div>
 
@@ -182,14 +177,12 @@ onUnmounted(() => {
         scrollable
         scroll-height="flex"
         class="logs-table"
-        @row-select="onRowSelect"
-      >
+        @row-select="onRowSelect">
         <Column
           field="timestamp"
           header="Timestamp"
           :sortable="true"
-          style="width: 200px"
-        >
+          style="width: 200px">
           <template #body="slotProps">
             <span class="timestamp">
               {{ formatTimestamp(slotProps.data.timestamp) }}
@@ -201,54 +194,39 @@ onUnmounted(() => {
           field="level"
           header="Level"
           :sortable="true"
-          style="width: 100px"
-        >
+          style="width: 100px">
           <template #body="slotProps">
             <Tag
               :value="slotProps.data.level"
               :severity="getLevelSeverity(slotProps.data.level)"
-              class="level-tag"
-            />
+              class="level-tag" />
           </template>
         </Column>
 
-        <Column
-          field="message"
-          header="Message"
-          :sortable="true"
-        >
+        <Column field="message" header="Message" :sortable="true">
           <template #body="slotProps">
             <span class="message-text">{{ slotProps.data.message }}</span>
           </template>
         </Column>
 
-        <Column
-          header="Actions"
-          style="width: 80px"
-        >
+        <Column header="Actions" style="width: 80px">
           <template #body>
             <Button
               icon="pi pi-eye"
               size="small"
               text
               rounded
-              aria-label="View Details"
-            />
+              aria-label="View Details" />
           </template>
         </Column>
       </DataTable>
 
       <!-- Loading More Indicator -->
-      <div
-        v-if="loadingMore"
-        class="loading-more-container"
-      >
+      <div v-if="loadingMore" class="loading-more-container">
         <div class="loading-more-spinner">
           <div class="spinner-ring" />
         </div>
-        <p class="loading-more-text">
-          Loading more entries...
-        </p>
+        <p class="loading-more-text">Loading more entries...</p>
       </div>
     </template>
   </Card>

@@ -1,21 +1,6 @@
 <script setup lang="ts">
-interface LogEntry {
-  timestamp: string;
-  level: string;
-  message: string;
-  template?: string;
-  exception?: string;
-  eventId?: string;
-  properties?: Record<string, any>;
-}
-
-interface LogFileInfo {
-  path: string;
-  totalCount: number;
-  logLevels: string[];
-  dateRange?: [string, string];
-}
-
+import LogFileInfo from "../types/LogFileInfo";
+import LogEntry from "../types/LogEntry";
 interface Props {
   logFile?: LogFileInfo | null;
   logEntries: LogEntry[];
@@ -49,10 +34,7 @@ function getSelectedEntryIndex(): number {
     </div>
 
     <div class="status-right">
-      <span
-        v-if="loadingMore"
-        class="loading-indicator"
-      >
+      <span v-if="loadingMore" class="loading-indicator">
         <i class="pi pi-spin pi-spinner" />
         Loading more entries...
       </span>

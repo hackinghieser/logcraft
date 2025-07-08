@@ -4,16 +4,11 @@ import Button from "primevue/button";
 import InputText from "primevue/inputtext";
 import MultiSelect from "primevue/multiselect";
 import Calendar from "primevue/calendar";
-
-interface Filters {
-  selectedLevels: string[];
-  searchText: string;
-  dateRange: Date[];
-}
+import { Filters } from "../types/Filters";
 
 interface Props {
   logLevels?: string[];
-  initialFilters: Filters;
+  initialFilters?: Filters;
 }
 
 // Common log levels used when no file is loaded
@@ -30,7 +25,9 @@ const props = withDefaults(defineProps<Props>(), {
 
 // Use file-specific log levels if available, otherwise use defaults
 const availableLogLevels = computed(() => {
-  return props.logLevels && props.logLevels.length > 0 ? props.logLevels : DEFAULT_LOG_LEVELS;
+  return props.logLevels && props.logLevels.length > 0
+    ? props.logLevels
+    : DEFAULT_LOG_LEVELS;
 });
 
 const emit = defineEmits<{
@@ -79,9 +76,12 @@ watch(
         <MultiSelect
           v-model="selectedLevels"
           :options="availableLogLevels"
-          :placeholder="props.logLevels && props.logLevels.length > 0 ? 'All Levels' : 'All Levels (defaults)'"
-          class="filter-control"
-        />
+          :placeholder="
+            props.logLevels && props.logLevels.length > 0
+              ? 'All Levels'
+              : 'All Levels (defaults)'
+          "
+          class="filter-control" />
       </div>
 
       <div class="filter-group">
@@ -89,8 +89,7 @@ watch(
         <InputText
           v-model="searchText"
           placeholder="Search messages..."
-          class="filter-control"
-        />
+          class="filter-control" />
       </div>
 
       <div class="filter-group">
@@ -100,8 +99,7 @@ watch(
           selection-mode="range"
           :show-icon="true"
           date-format="yy-mm-dd"
-          class="filter-control"
-        />
+          class="filter-control" />
       </div>
 
       <div class="filter-group">
@@ -112,8 +110,7 @@ watch(
           outlined
           class="filter-control"
           aria-label="Clear all filters"
-          @click="clearFilters"
-        />
+          @click="clearFilters" />
       </div>
     </div>
   </div>
