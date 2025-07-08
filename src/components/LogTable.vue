@@ -314,7 +314,8 @@ onUnmounted(() => {
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(255, 255, 255, 0.95);
+  background: var(--p-surface-ground);
+  opacity: 0.95;
   backdrop-filter: blur(4px);
   display: flex;
   align-items: center;
