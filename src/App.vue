@@ -199,8 +199,8 @@ async function handleFileOpen(filePath: string) {
 }
 
 function handleToggleTheme() {
-  // TODO: Implement theme toggle
-  console.log("Toggle theme...");
+  const newTheme = (window as any).toggleTheme?.();
+  console.log(`Theme switched to: ${newTheme}`);
 }
 
 function handleOpenSettings() {
@@ -319,35 +319,61 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div class="app-container" :class="{ 'drag-over': isDragOver }">
+  <div
+    class="app-container"
+    :class="{ 'drag-over': isDragOver }"
+  >
     <!-- Toolbar -->
-    <AppToolbar :log-file="logFile" @open-file="handleOpenFile" @toggle-theme="handleToggleTheme"
-      @open-settings="handleOpenSettings" />
+    <AppToolbar
+      :log-file="logFile"
+      @open-file="handleOpenFile"
+      @toggle-theme="handleToggleTheme"
+      @open-settings="handleOpenSettings"
+    />
 
     <!-- Filters Panel -->
-    <FiltersPanel :log-levels="logFile?.logLevels || []" :initial-filters="currentFilters"
-      @update-filters="handleUpdateFilters" />
+    <FiltersPanel
+      :log-levels="logFile?.logLevels || []"
+      :initial-filters="currentFilters"
+      @update-filters="handleUpdateFilters"
+    />
 
     <!-- Main Content -->
     <div class="main-content">
       <Splitter>
         <!-- Log Table -->
-        <SplitterPanel :size="70" :min-size="50">
-          <LogTable :log-entries="filteredEntries" :selected-entry="selectedEntry" :loading="loading"
-            :has-more-pages="hasMorePages" :loading-more="loadingMore" @entry-select="handleEntrySelect"
-            @load-more="loadMoreEntries" />
+        <SplitterPanel
+          :size="70"
+          :min-size="50"
+        >
+          <LogTable
+            :log-entries="filteredEntries"
+            :selected-entry="selectedEntry"
+            :loading="loading"
+            :has-more-pages="hasMorePages"
+            :loading-more="loadingMore"
+            @entry-select="handleEntrySelect"
+            @load-more="loadMoreEntries"
+          />
         </SplitterPanel>
 
         <!-- Details Panel -->
-        <SplitterPanel :size="30" :min-size="25">
+        <SplitterPanel
+          :size="30"
+          :min-size="25"
+        >
           <DetailsPanel :selected-entry="selectedEntry" />
         </SplitterPanel>
       </Splitter>
     </div>
 
     <!-- Status Bar -->
-    <StatusBar :log-file="logFile" :log-entries="filteredEntries" :selected-entry="selectedEntry"
-      :loading-more="loadingMore" />
+    <StatusBar
+      :log-file="logFile"
+      :log-entries="filteredEntries"
+      :selected-entry="selectedEntry"
+      :loading-more="loadingMore"
+    />
   </div>
 </template>
 

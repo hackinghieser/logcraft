@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, watch } from "vue";
+import { ref, watch, computed } from "vue";
 import Button from "primevue/button";
 import InputText from "primevue/inputtext";
 import MultiSelect from "primevue/multiselect";
@@ -16,6 +16,9 @@ interface Props {
   initialFilters: Filters;
 }
 
+// Common log levels used when no file is loaded
+const DEFAULT_LOG_LEVELS = ["Error", "Warning", "Information", "Debug"];
+
 const props = withDefaults(defineProps<Props>(), {
   logLevels: () => [],
   initialFilters: () => ({
@@ -23,6 +26,11 @@ const props = withDefaults(defineProps<Props>(), {
     searchText: "",
     dateRange: [],
   }),
+});
+
+// Use file-specific log levels if available, otherwise use defaults
+const availableLogLevels = computed(() => {
+  return props.logLevels && props.logLevels.length > 0 ? props.logLevels : DEFAULT_LOG_LEVELS;
 });
 
 const emit = defineEmits<{
@@ -70,9 +78,10 @@ watch(
         <label>Log Level</label>
         <MultiSelect
           v-model="selectedLevels"
-          :options="logLevels"
-          placeholder="All Levels"
-          class="filter-control" />
+          :options="availableLogLevels"
+          :placeholder="props.logLevels && props.logLevels.length > 0 ? 'All Levels' : 'All Levels (defaults)'"
+          class="filter-control"
+        />
       </div>
 
       <div class="filter-group">
@@ -80,7 +89,8 @@ watch(
         <InputText
           v-model="searchText"
           placeholder="Search messages..."
-          class="filter-control" />
+          class="filter-control"
+        />
       </div>
 
       <div class="filter-group">
@@ -90,7 +100,8 @@ watch(
           selection-mode="range"
           :show-icon="true"
           date-format="yy-mm-dd"
-          class="filter-control" />
+          class="filter-control"
+        />
       </div>
 
       <div class="filter-group">
@@ -101,7 +112,8 @@ watch(
           outlined
           class="filter-control"
           aria-label="Clear all filters"
-          @click="clearFilters" />
+          @click="clearFilters"
+        />
       </div>
     </div>
   </div>
