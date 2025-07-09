@@ -342,7 +342,7 @@ onUnmounted(() => {
   align-items: center;
   padding: 20px;
   border-top: 1px solid var(--p-surface-border);
-  background: var(--p-surface-50);
+  background: var(--p-surface-card);
 }
 
 .loading-more-spinner {
