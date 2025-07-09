@@ -19,7 +19,7 @@ const LogcraftPreset = definePreset(Aura, {
       700: "{orange.700}",
       800: "{orange.800}",
       900: "{orange.900}",
-      950: "{orange.950}"
+      950: "{orange.950}",
     },
     surface: {
       0: "{slate.0}",
@@ -33,8 +33,8 @@ const LogcraftPreset = definePreset(Aura, {
       700: "{slate.700}",
       800: "{slate.800}",
       900: "{slate.900}",
-      950: "{slate.950}"
-    }
+      950: "{slate.950}",
+    },
   },
   light: {
     primary: {
@@ -48,7 +48,7 @@ const LogcraftPreset = definePreset(Aura, {
       700: "{orange.700}",
       800: "{orange.800}",
       900: "{orange.900}",
-      950: "{orange.950}"
+      950: "{orange.950}",
     },
     surface: {
       0: "{slate.0}",
@@ -62,8 +62,8 @@ const LogcraftPreset = definePreset(Aura, {
       700: "{slate.700}",
       800: "{slate.800}",
       900: "{slate.900}",
-      950: "{slate.950}"
-    }
+      950: "{slate.950}",
+    },
   },
   dark: {
     primary: {
@@ -77,7 +77,7 @@ const LogcraftPreset = definePreset(Aura, {
       700: "{orange.300}",
       800: "{orange.200}",
       900: "{orange.100}",
-      950: "{orange.50}"
+      950: "{orange.50}",
     },
     surface: {
       0: "{slate.950}",
@@ -91,9 +91,9 @@ const LogcraftPreset = definePreset(Aura, {
       700: "{slate.200}",
       800: "{slate.100}",
       900: "{slate.50}",
-      950: "{slate.0}"
-    }
-  }
+      950: "{slate.0}",
+    },
+  },
 });
 
 const app = createApp(App);
@@ -122,11 +122,11 @@ function updateTheme(isDark: boolean) {
     document.documentElement.classList.add("light-theme");
     document.documentElement.classList.remove("dark-theme");
   }
-  
+
   // Force a repaint to ensure theme changes are applied
-  document.body.style.display = 'none';
+  document.body.style.display = "none";
   document.body.offsetHeight; // Trigger reflow
-  document.body.style.display = '';
+  document.body.style.display = "";
 }
 
 // Theme management functions
@@ -140,9 +140,10 @@ function applyCurrentTheme() {
 
 function toggleTheme() {
   // Simple two-state toggle: light <-> dark
-  const currentIsDark = themeMode === "dark" || 
+  const currentIsDark =
+    themeMode === "dark" ||
     (themeMode === "system" && darkModeMediaQuery.matches);
-  
+
   themeMode = currentIsDark ? "light" : "dark";
   applyCurrentTheme();
   return themeMode;

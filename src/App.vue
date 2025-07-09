@@ -10,7 +10,7 @@ import LogTable from "./components/LogTable.vue";
 import DetailsPanel from "./components/DetailsPanel.vue";
 import StatusBar from "./components/StatusBar.vue";
 
-import { Filters } from "./types/Filters";
+import Filters from "./types/Filters";
 import LogEntry from "./types/LogEntry";
 import LogFileInfo from "./types/LogFileInfo";
 

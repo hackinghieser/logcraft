@@ -166,9 +166,21 @@ onUnmounted(() => {
         </div>
       </div>
 
-      <DataTable v-else ref="dataTableRef" :value="logEntries" :selection="selectedEntry" selection-mode="single"
-        scrollable scroll-height="flex" class="logs-table" @row-select="onRowSelect">
-        <Column field="timestamp" header="Timestamp" :sortable="true" style="width: 200px">
+      <DataTable
+        v-else
+        ref="dataTableRef"
+        :value="logEntries"
+        :selection="selectedEntry"
+        selection-mode="single"
+        scrollable
+        scroll-height="flex"
+        class="logs-table"
+        @row-select="onRowSelect">
+        <Column
+          field="timestamp"
+          header="Timestamp"
+          :sortable="true"
+          style="width: 200px">
           <template #body="slotProps">
             <span class="timestamp">
               {{ formatTimestamp(slotProps.data.timestamp) }}
@@ -176,9 +188,16 @@ onUnmounted(() => {
           </template>
         </Column>
 
-        <Column field="level" header="Level" :sortable="true" style="width: 100px">
+        <Column
+          field="level"
+          header="Level"
+          :sortable="true"
+          style="width: 100px">
           <template #body="slotProps">
-            <Tag :value="slotProps.data.level" :severity="getLevelSeverity(slotProps.data.level)" class="level-tag" />
+            <Tag
+              :value="slotProps.data.level"
+              :severity="getLevelSeverity(slotProps.data.level)"
+              class="level-tag" />
           </template>
         </Column>
 
@@ -190,7 +209,12 @@ onUnmounted(() => {
 
         <Column header="Actions" style="width: 80px">
           <template #body>
-            <Button icon="pi pi-eye" size="small" text rounded aria-label="View Details" />
+            <Button
+              icon="pi pi-eye"
+              size="small"
+              text
+              rounded
+              aria-label="View Details" />
           </template>
         </Column>
       </DataTable>

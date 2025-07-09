@@ -63,37 +63,70 @@ async function copyToClipboard(text: string, fieldName: string) {
       <div v-if="selectedEntry">
         <!-- Basic Information Panel -->
         <Panel header="Basic Information">
-          <div style="display: flex; flex-direction: column; gap: 1rem;">
-            <div class="hover-copy-container" style="display: flex; align-items: center; gap: 1rem;">
-              <div style="display: flex; align-items: center; gap: 0.5rem; min-width: 120px;">
+          <div style="display: flex; flex-direction: column; gap: 1rem">
+            <div
+              class="hover-copy-container"
+              style="display: flex; align-items: center; gap: 1rem">
+              <div
+                style="
+                  display: flex;
+                  align-items: center;
+                  gap: 0.5rem;
+                  min-width: 120px;
+                ">
                 <i class="pi pi-clock" />
                 <span>Timestamp:</span>
               </div>
-              <span style="flex: 1;">{{ formatTimestamp(selectedEntry.timestamp) }}</span>
-              <Button 
-                v-tooltip.top="copiedField === 'timestamp' ? 'Copied!' : 'Copy timestamp'"
-                :icon="copiedField === 'timestamp' ? 'pi pi-check' : 'pi pi-copy'"
-                :severity="copiedField === 'timestamp' ? 'success' : 'secondary'"
-                size="small" 
-                text 
+              <span style="flex: 1">{{
+                formatTimestamp(selectedEntry.timestamp)
+              }}</span>
+              <Button
+                v-tooltip.top="
+                  copiedField === 'timestamp' ? 'Copied!' : 'Copy timestamp'
+                "
+                :icon="
+                  copiedField === 'timestamp' ? 'pi pi-check' : 'pi pi-copy'
+                "
+                :severity="
+                  copiedField === 'timestamp' ? 'success' : 'secondary'
+                "
+                size="small"
+                text
                 class="copy-btn"
-                @click="copyToClipboard(formatTimestamp(selectedEntry.timestamp), 'timestamp')" />
+                @click="
+                  copyToClipboard(
+                    formatTimestamp(selectedEntry.timestamp),
+                    'timestamp',
+                  )
+                " />
             </div>
 
-            <div class="hover-copy-container" style="display: flex; align-items: center; gap: 1rem;">
-              <div style="display: flex; align-items: center; gap: 0.5rem; min-width: 120px;">
+            <div
+              class="hover-copy-container"
+              style="display: flex; align-items: center; gap: 1rem">
+              <div
+                style="
+                  display: flex;
+                  align-items: center;
+                  gap: 0.5rem;
+                  min-width: 120px;
+                ">
                 <i class="pi pi-tag" />
                 <span>Level:</span>
               </div>
-              <div style="flex: 1;">
-                <Tag :value="selectedEntry.level" :severity="getLevelSeverity(selectedEntry.level)" />
+              <div style="flex: 1">
+                <Tag
+                  :value="selectedEntry.level"
+                  :severity="getLevelSeverity(selectedEntry.level)" />
               </div>
-              <Button 
-                v-tooltip.top="copiedField === 'level' ? 'Copied!' : 'Copy level'"
+              <Button
+                v-tooltip.top="
+                  copiedField === 'level' ? 'Copied!' : 'Copy level'
+                "
                 :icon="copiedField === 'level' ? 'pi pi-check' : 'pi pi-copy'"
                 :severity="copiedField === 'level' ? 'success' : 'secondary'"
-                size="small" 
-                text 
+                size="small"
+                text
                 class="copy-btn"
                 @click="copyToClipboard(selectedEntry.level, 'level')" />
             </div>
@@ -101,83 +134,132 @@ async function copyToClipboard(text: string, fieldName: string) {
         </Panel>
 
         <!-- Message Panel -->
-        <Panel header="Message" style="margin-top: 1rem;">
-          <div class="hover-copy-container" style="display: flex; align-items: flex-start; gap: 1rem;">
-            <pre style="margin: 0; white-space: pre-wrap; flex: 1;">{{ selectedEntry.message }}</pre>
-            <Button 
-              v-tooltip.top="copiedField === 'message' ? 'Copied!' : 'Copy message'"
+        <Panel header="Message" style="margin-top: 1rem">
+          <div
+            class="hover-copy-container"
+            style="display: flex; align-items: flex-start; gap: 1rem">
+            <pre style="margin: 0; white-space: pre-wrap; flex: 1">{{
+              selectedEntry.message
+            }}</pre>
+            <Button
+              v-tooltip.top="
+                copiedField === 'message' ? 'Copied!' : 'Copy message'
+              "
               :icon="copiedField === 'message' ? 'pi pi-check' : 'pi pi-copy'"
               :severity="copiedField === 'message' ? 'success' : 'secondary'"
-              size="small" 
-              text 
+              size="small"
+              text
               class="copy-btn"
               @click="copyToClipboard(selectedEntry.message, 'message')" />
           </div>
         </Panel>
 
         <!-- Event ID Panel -->
-        <Panel v-if="selectedEntry.eventId" header="Event ID" style="margin-top: 1rem;">
-          <div class="hover-copy-container" style="display: flex; align-items: center; gap: 1rem;">
-            <span style="flex: 1;">{{ selectedEntry.eventId }}</span>
-            <Button 
-              v-tooltip.top="copiedField === 'eventId' ? 'Copied!' : 'Copy event ID'"
+        <Panel
+          v-if="selectedEntry.eventId"
+          header="Event ID"
+          style="margin-top: 1rem">
+          <div
+            class="hover-copy-container"
+            style="display: flex; align-items: center; gap: 1rem">
+            <span style="flex: 1">{{ selectedEntry.eventId }}</span>
+            <Button
+              v-tooltip.top="
+                copiedField === 'eventId' ? 'Copied!' : 'Copy event ID'
+              "
               :icon="copiedField === 'eventId' ? 'pi pi-check' : 'pi pi-copy'"
               :severity="copiedField === 'eventId' ? 'success' : 'secondary'"
-              size="small" 
-              text 
+              size="small"
+              text
               class="copy-btn"
               @click="copyToClipboard(selectedEntry.eventId!, 'eventId')" />
           </div>
         </Panel>
 
         <!-- Message Template Panel -->
-        <Panel v-if="selectedEntry.template" header="Message Template" style="margin-top: 1rem;">
-          <div class="hover-copy-container" style="display: flex; align-items: flex-start; gap: 1rem;">
-            <pre style="margin: 0; white-space: pre-wrap; flex: 1;">{{ selectedEntry.template }}</pre>
-            <Button 
-              v-tooltip.top="copiedField === 'template' ? 'Copied!' : 'Copy template'"
+        <Panel
+          v-if="selectedEntry.template"
+          header="Message Template"
+          style="margin-top: 1rem">
+          <div
+            class="hover-copy-container"
+            style="display: flex; align-items: flex-start; gap: 1rem">
+            <pre style="margin: 0; white-space: pre-wrap; flex: 1">{{
+              selectedEntry.template
+            }}</pre>
+            <Button
+              v-tooltip.top="
+                copiedField === 'template' ? 'Copied!' : 'Copy template'
+              "
               :icon="copiedField === 'template' ? 'pi pi-check' : 'pi pi-copy'"
               :severity="copiedField === 'template' ? 'success' : 'secondary'"
-              size="small" 
-              text 
+              size="small"
+              text
               class="copy-btn"
               @click="copyToClipboard(selectedEntry.template!, 'template')" />
           </div>
         </Panel>
 
         <!-- Properties Panel -->
-        <Panel v-if="selectedEntry.properties" header="Properties" style="margin-top: 1rem;">
-          <div class="hover-copy-container" style="display: flex; align-items: flex-start; gap: 1rem;">
-            <pre style="margin: 0; white-space: pre-wrap; flex: 1;">{{ JSON.stringify(selectedEntry.properties, null, 2) }}</pre>
-            <Button 
-              v-tooltip.top="copiedField === 'properties' ? 'Copied!' : 'Copy properties'"
-              :icon="copiedField === 'properties' ? 'pi pi-check' : 'pi pi-copy'"
+        <Panel
+          v-if="selectedEntry.properties"
+          header="Properties"
+          style="margin-top: 1rem">
+          <div
+            class="hover-copy-container"
+            style="display: flex; align-items: flex-start; gap: 1rem">
+            <pre style="margin: 0; white-space: pre-wrap; flex: 1">{{
+              JSON.stringify(selectedEntry.properties, null, 2)
+            }}</pre>
+            <Button
+              v-tooltip.top="
+                copiedField === 'properties' ? 'Copied!' : 'Copy properties'
+              "
+              :icon="
+                copiedField === 'properties' ? 'pi pi-check' : 'pi pi-copy'
+              "
               :severity="copiedField === 'properties' ? 'success' : 'secondary'"
-              size="small" 
-              text 
+              size="small"
+              text
               class="copy-btn"
-              @click="copyToClipboard(JSON.stringify(selectedEntry.properties, null, 2), 'properties')" />
+              @click="
+                copyToClipboard(
+                  JSON.stringify(selectedEntry.properties, null, 2),
+                  'properties',
+                )
+              " />
           </div>
         </Panel>
 
         <!-- Exception Panel -->
-        <Panel v-if="selectedEntry.exception" header="Exception" style="margin-top: 1rem;">
-          <div class="hover-copy-container" style="display: flex; align-items: flex-start; gap: 1rem;">
-            <pre style="margin: 0; white-space: pre-wrap; flex: 1;">{{ selectedEntry.exception }}</pre>
-            <Button 
-              v-tooltip.top="copiedField === 'exception' ? 'Copied!' : 'Copy exception'"
+        <Panel
+          v-if="selectedEntry.exception"
+          header="Exception"
+          style="margin-top: 1rem">
+          <div
+            class="hover-copy-container"
+            style="display: flex; align-items: flex-start; gap: 1rem">
+            <pre style="margin: 0; white-space: pre-wrap; flex: 1">{{
+              selectedEntry.exception
+            }}</pre>
+            <Button
+              v-tooltip.top="
+                copiedField === 'exception' ? 'Copied!' : 'Copy exception'
+              "
               :icon="copiedField === 'exception' ? 'pi pi-check' : 'pi pi-copy'"
               :severity="copiedField === 'exception' ? 'success' : 'secondary'"
-              size="small" 
-              text 
+              size="small"
+              text
               class="copy-btn"
               @click="copyToClipboard(selectedEntry.exception!, 'exception')" />
           </div>
         </Panel>
       </div>
 
-      <div v-else style="text-align: center; padding: 2rem;">
-        <i class="pi pi-info-circle" style="font-size: 3rem; opacity: 0.5; margin-bottom: 1rem;" />
+      <div v-else style="text-align: center; padding: 2rem">
+        <i
+          class="pi pi-info-circle"
+          style="font-size: 3rem; opacity: 0.5; margin-bottom: 1rem" />
         <p>Select a log entry to view details</p>
       </div>
     </div>
