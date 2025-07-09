@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref } from "vue";
 import Card from "primevue/card";
+import Panel from "primevue/panel";
 import Tag from "primevue/tag";
 import Button from "primevue/button";
 import LogEntry from "../types/LogEntry";
@@ -52,312 +53,174 @@ async function copyToClipboard(text: string, fieldName: string) {
 </script>
 
 <template>
-  <Card class="details-panel-card">
-    <template #title>
-      <div class="panel-header">
-        <i class="pi pi-info-circle" />
-        Entry Details
-      </div>
-    </template>
+  <div class="details-panel">
+    <div class="panel-header">
+      <i class="pi pi-info-circle" />
+      Log Entry Details
+    </div>
 
-    <template #content>
-      <div v-if="selectedEntry" class="details-content">
-        <div class="property-group">
-          <div class="property-title">
-            <i class="pi pi-clock" />
-            Timestamp
-          </div>
-          <div class="property-value-container">
-            <div class="property-value">
-              {{ formatTimestamp(selectedEntry.timestamp) }}
+    <div class="panel-content">
+      <div v-if="selectedEntry">
+        <!-- Basic Information Panel -->
+        <Panel header="Basic Information">
+          <div style="display: flex; flex-direction: column; gap: 1rem;">
+            <div class="hover-copy-container" style="display: flex; align-items: center; gap: 1rem;">
+              <div style="display: flex; align-items: center; gap: 0.5rem; min-width: 120px;">
+                <i class="pi pi-clock" />
+                <span>Timestamp:</span>
+              </div>
+              <span style="flex: 1;">{{ formatTimestamp(selectedEntry.timestamp) }}</span>
+              <Button 
+                v-tooltip.top="copiedField === 'timestamp' ? 'Copied!' : 'Copy timestamp'"
+                :icon="copiedField === 'timestamp' ? 'pi pi-check' : 'pi pi-copy'"
+                :severity="copiedField === 'timestamp' ? 'success' : 'secondary'"
+                size="small" 
+                text 
+                class="copy-btn"
+                @click="copyToClipboard(formatTimestamp(selectedEntry.timestamp), 'timestamp')" />
             </div>
-            <Button
-              v-tooltip.top="
-                copiedField === 'timestamp' ? 'Copied!' : 'Copy timestamp'
-              "
-              :icon="copiedField === 'timestamp' ? 'pi pi-check' : 'pi pi-copy'"
-              :class="{ 'copy-success': copiedField === 'timestamp' }"
-              size="small"
-              text
-              rounded
-              class="copy-btn"
-              @click="
-                copyToClipboard(
-                  formatTimestamp(selectedEntry.timestamp),
-                  'timestamp',
-                )
-              " />
-          </div>
-        </div>
 
-        <div class="property-group">
-          <div class="property-title">
-            <i class="pi pi-tag" />
-            Level
-          </div>
-          <div class="property-value-container">
-            <div class="property-value">
-              <Tag
-                :value="selectedEntry.level"
-                :severity="getLevelSeverity(selectedEntry.level)" />
+            <div class="hover-copy-container" style="display: flex; align-items: center; gap: 1rem;">
+              <div style="display: flex; align-items: center; gap: 0.5rem; min-width: 120px;">
+                <i class="pi pi-tag" />
+                <span>Level:</span>
+              </div>
+              <div style="flex: 1;">
+                <Tag :value="selectedEntry.level" :severity="getLevelSeverity(selectedEntry.level)" />
+              </div>
+              <Button 
+                v-tooltip.top="copiedField === 'level' ? 'Copied!' : 'Copy level'"
+                :icon="copiedField === 'level' ? 'pi pi-check' : 'pi pi-copy'"
+                :severity="copiedField === 'level' ? 'success' : 'secondary'"
+                size="small" 
+                text 
+                class="copy-btn"
+                @click="copyToClipboard(selectedEntry.level, 'level')" />
             </div>
-            <Button
-              v-tooltip.top="copiedField === 'level' ? 'Copied!' : 'Copy level'"
-              :icon="copiedField === 'level' ? 'pi pi-check' : 'pi pi-copy'"
-              :class="{ 'copy-success': copiedField === 'level' }"
-              size="small"
-              text
-              rounded
-              class="copy-btn"
-              @click="copyToClipboard(selectedEntry.level, 'level')" />
           </div>
-        </div>
+        </Panel>
 
-        <div class="property-group">
-          <div class="property-title">
-            <i class="pi pi-comment" />
-            Message
-          </div>
-          <div class="property-value-container">
-            <div class="property-value message-text">
-              <pre>{{ selectedEntry.message }}</pre>
-            </div>
-            <Button
-              v-tooltip.top="
-                copiedField === 'message' ? 'Copied!' : 'Copy message'
-              "
+        <!-- Message Panel -->
+        <Panel header="Message" style="margin-top: 1rem;">
+          <div class="hover-copy-container" style="display: flex; align-items: flex-start; gap: 1rem;">
+            <pre style="margin: 0; white-space: pre-wrap; flex: 1;">{{ selectedEntry.message }}</pre>
+            <Button 
+              v-tooltip.top="copiedField === 'message' ? 'Copied!' : 'Copy message'"
               :icon="copiedField === 'message' ? 'pi pi-check' : 'pi pi-copy'"
-              :class="{ 'copy-success': copiedField === 'message' }"
-              size="small"
-              text
-              rounded
+              :severity="copiedField === 'message' ? 'success' : 'secondary'"
+              size="small" 
+              text 
               class="copy-btn"
               @click="copyToClipboard(selectedEntry.message, 'message')" />
           </div>
-        </div>
+        </Panel>
 
-        <div v-if="selectedEntry.eventId" class="property-group">
-          <div class="property-title">
-            <i class="pi pi-key" />
-            Event ID
-          </div>
-          <div class="property-value-container">
-            <div class="property-value">
-              {{ selectedEntry.eventId }}
-            </div>
-            <Button
-              v-tooltip.top="
-                copiedField === 'eventId' ? 'Copied!' : 'Copy event ID'
-              "
+        <!-- Event ID Panel -->
+        <Panel v-if="selectedEntry.eventId" header="Event ID" style="margin-top: 1rem;">
+          <div class="hover-copy-container" style="display: flex; align-items: center; gap: 1rem;">
+            <span style="flex: 1;">{{ selectedEntry.eventId }}</span>
+            <Button 
+              v-tooltip.top="copiedField === 'eventId' ? 'Copied!' : 'Copy event ID'"
               :icon="copiedField === 'eventId' ? 'pi pi-check' : 'pi pi-copy'"
-              :class="{ 'copy-success': copiedField === 'eventId' }"
-              size="small"
-              text
-              rounded
+              :severity="copiedField === 'eventId' ? 'success' : 'secondary'"
+              size="small" 
+              text 
               class="copy-btn"
               @click="copyToClipboard(selectedEntry.eventId!, 'eventId')" />
           </div>
-        </div>
+        </Panel>
 
-        <div v-if="selectedEntry.template" class="property-group">
-          <div class="property-title">
-            <i class="pi pi-file-edit" />
-            Message Template
-          </div>
-          <div class="property-value-container">
-            <div class="property-value">
-              <pre>{{ selectedEntry.template }}</pre>
-            </div>
-            <Button
-              v-tooltip.top="
-                copiedField === 'template' ? 'Copied!' : 'Copy template'
-              "
+        <!-- Message Template Panel -->
+        <Panel v-if="selectedEntry.template" header="Message Template" style="margin-top: 1rem;">
+          <div class="hover-copy-container" style="display: flex; align-items: flex-start; gap: 1rem;">
+            <pre style="margin: 0; white-space: pre-wrap; flex: 1;">{{ selectedEntry.template }}</pre>
+            <Button 
+              v-tooltip.top="copiedField === 'template' ? 'Copied!' : 'Copy template'"
               :icon="copiedField === 'template' ? 'pi pi-check' : 'pi pi-copy'"
-              :class="{ 'copy-success': copiedField === 'template' }"
-              size="small"
-              text
-              rounded
+              :severity="copiedField === 'template' ? 'success' : 'secondary'"
+              size="small" 
+              text 
               class="copy-btn"
               @click="copyToClipboard(selectedEntry.template!, 'template')" />
           </div>
-        </div>
+        </Panel>
 
-        <div v-if="selectedEntry.properties" class="property-group">
-          <div class="property-title">
-            <i class="pi pi-cog" />
-            Properties
-          </div>
-          <div class="property-value-container">
-            <div class="property-value">
-              <pre>{{ JSON.stringify(selectedEntry.properties, null, 2) }}</pre>
-            </div>
-            <Button
-              v-tooltip.top="
-                copiedField === 'properties' ? 'Copied!' : 'Copy properties'
-              "
-              :icon="
-                copiedField === 'properties' ? 'pi pi-check' : 'pi pi-copy'
-              "
-              :class="{ 'copy-success': copiedField === 'properties' }"
-              size="small"
-              text
-              rounded
+        <!-- Properties Panel -->
+        <Panel v-if="selectedEntry.properties" header="Properties" style="margin-top: 1rem;">
+          <div class="hover-copy-container" style="display: flex; align-items: flex-start; gap: 1rem;">
+            <pre style="margin: 0; white-space: pre-wrap; flex: 1;">{{ JSON.stringify(selectedEntry.properties, null, 2) }}</pre>
+            <Button 
+              v-tooltip.top="copiedField === 'properties' ? 'Copied!' : 'Copy properties'"
+              :icon="copiedField === 'properties' ? 'pi pi-check' : 'pi pi-copy'"
+              :severity="copiedField === 'properties' ? 'success' : 'secondary'"
+              size="small" 
+              text 
               class="copy-btn"
-              @click="
-                copyToClipboard(
-                  JSON.stringify(selectedEntry.properties, null, 2),
-                  'properties',
-                )
-              " />
+              @click="copyToClipboard(JSON.stringify(selectedEntry.properties, null, 2), 'properties')" />
           </div>
-        </div>
+        </Panel>
 
-        <div v-if="selectedEntry.exception" class="property-group">
-          <div class="property-title">
-            <i class="pi pi-exclamation-triangle" />
-            Exception
-          </div>
-          <div class="property-value-container">
-            <div class="property-value">
-              <pre>{{ selectedEntry.exception }}</pre>
-            </div>
-            <Button
-              v-tooltip.top="
-                copiedField === 'exception' ? 'Copied!' : 'Copy exception'
-              "
+        <!-- Exception Panel -->
+        <Panel v-if="selectedEntry.exception" header="Exception" style="margin-top: 1rem;">
+          <div class="hover-copy-container" style="display: flex; align-items: flex-start; gap: 1rem;">
+            <pre style="margin: 0; white-space: pre-wrap; flex: 1;">{{ selectedEntry.exception }}</pre>
+            <Button 
+              v-tooltip.top="copiedField === 'exception' ? 'Copied!' : 'Copy exception'"
               :icon="copiedField === 'exception' ? 'pi pi-check' : 'pi pi-copy'"
-              :class="{ 'copy-success': copiedField === 'exception' }"
-              size="small"
-              text
-              rounded
+              :severity="copiedField === 'exception' ? 'success' : 'secondary'"
+              size="small" 
+              text 
               class="copy-btn"
               @click="copyToClipboard(selectedEntry.exception!, 'exception')" />
           </div>
-        </div>
+        </Panel>
       </div>
 
-      <div v-else class="no-selection">
-        <i class="pi pi-info-circle" />
+      <div v-else style="text-align: center; padding: 2rem;">
+        <i class="pi pi-info-circle" style="font-size: 3rem; opacity: 0.5; margin-bottom: 1rem;" />
         <p>Select a log entry to view details</p>
       </div>
-    </template>
-  </Card>
+    </div>
+  </div>
 </template>
 
 <style scoped>
-.details-panel-card {
+.hover-copy-container {
+  position: relative;
+}
+
+.hover-copy-container .copy-btn {
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.hover-copy-container:hover .copy-btn {
+  opacity: 1;
+}
+
+.copy-btn.copy-success {
+  opacity: 1 !important;
+}
+
+.details-panel {
   height: 100%;
   display: flex;
   flex-direction: column;
-  overflow: hidden;
-}
-
-.details-panel-card :deep(.p-card-content),
-.details-panel-card :deep(.p-card-body) {
-  padding: 0;
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  min-height: 0;
-  overflow: hidden;
 }
 
 .panel-header {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 0.5rem;
+  padding: 1rem;
   font-weight: 600;
-  color: var(--p-text-color);
-  padding: 12px 16px;
+  font-size: 1.125rem;
   border-bottom: 1px solid var(--p-surface-border);
 }
 
-.details-content {
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
+.panel-content {
+  flex: 1;
+  padding: 1rem;
   overflow-y: auto;
-  flex: 1;
-  padding: 16px;
-  min-height: 0;
-}
-
-.property-group {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.property-title {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-weight: 600;
-  color: var(--p-text-color);
-  font-size: 14px;
-}
-
-.property-value-container {
-  position: relative;
-  display: flex;
-  align-items: flex-start;
-  gap: 8px;
-}
-
-.property-value-container .property-value {
-  flex: 1;
-  margin: 0;
-}
-
-.copy-btn {
-  opacity: 0;
-  transition: opacity 0.2s ease;
-  align-self: flex-start;
-  margin-top: 8px;
-}
-
-.property-group:hover .copy-btn {
-  opacity: 1;
-}
-
-.copy-btn.copy-success {
-  opacity: 1;
-  color: var(--p-green-500) !important;
-}
-
-.property-value {
-  background: var(--p-surface-50);
-  border: 1px solid var(--p-surface-border);
-  padding: 12px;
-  border-radius: 6px;
-  font-size: 13px;
-  word-break: break-word;
-  color: var(--p-text-color);
-}
-
-.property-value pre {
-  margin: 0;
-  font-family: inherit;
-  font-size: inherit;
-  white-space: pre-wrap;
-  word-break: break-word;
-  overflow-wrap: break-word;
-}
-
-.no-selection {
-  text-align: center;
-  color: var(--p-text-muted-color);
-  padding: 40px 16px;
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-}
-
-.no-selection i {
-  font-size: 48px;
-  margin-bottom: 16px;
-  opacity: 0.5;
 }
 </style>

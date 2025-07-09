@@ -148,15 +148,13 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <Card class="logs-table-card">
-    <template #title>
-      <div class="table-header">
-        <i class="pi pi-list" />
-        Log Entries
-      </div>
-    </template>
+  <div class="logs-table-container">
+    <div class="table-header">
+      <i class="pi pi-list" />
+      Log Entries
+    </div>
 
-    <template #content>
+    <div class="table-content">
       <div v-if="loading" class="loading-overlay">
         <div class="loading-container">
           <div class="loading-spinner">
@@ -168,21 +166,9 @@ onUnmounted(() => {
         </div>
       </div>
 
-      <DataTable
-        v-else
-        ref="dataTableRef"
-        :value="logEntries"
-        :selection="selectedEntry"
-        selection-mode="single"
-        scrollable
-        scroll-height="flex"
-        class="logs-table"
-        @row-select="onRowSelect">
-        <Column
-          field="timestamp"
-          header="Timestamp"
-          :sortable="true"
-          style="width: 200px">
+      <DataTable v-else ref="dataTableRef" :value="logEntries" :selection="selectedEntry" selection-mode="single"
+        scrollable scroll-height="flex" class="logs-table" @row-select="onRowSelect">
+        <Column field="timestamp" header="Timestamp" :sortable="true" style="width: 200px">
           <template #body="slotProps">
             <span class="timestamp">
               {{ formatTimestamp(slotProps.data.timestamp) }}
@@ -190,16 +176,9 @@ onUnmounted(() => {
           </template>
         </Column>
 
-        <Column
-          field="level"
-          header="Level"
-          :sortable="true"
-          style="width: 100px">
+        <Column field="level" header="Level" :sortable="true" style="width: 100px">
           <template #body="slotProps">
-            <Tag
-              :value="slotProps.data.level"
-              :severity="getLevelSeverity(slotProps.data.level)"
-              class="level-tag" />
+            <Tag :value="slotProps.data.level" :severity="getLevelSeverity(slotProps.data.level)" class="level-tag" />
           </template>
         </Column>
 
@@ -211,12 +190,7 @@ onUnmounted(() => {
 
         <Column header="Actions" style="width: 80px">
           <template #body>
-            <Button
-              icon="pi pi-eye"
-              size="small"
-              text
-              rounded
-              aria-label="View Details" />
+            <Button icon="pi pi-eye" size="small" text rounded aria-label="View Details" />
           </template>
         </Column>
       </DataTable>
@@ -228,12 +202,12 @@ onUnmounted(() => {
         </div>
         <p class="loading-more-text">Loading more entries...</p>
       </div>
-    </template>
-  </Card>
+    </div>
+  </div>
 </template>
 
 <style scoped>
-.logs-table-card {
+.logs-table-container {
   height: 100%;
   display: flex;
   flex-direction: column;
@@ -241,9 +215,7 @@ onUnmounted(() => {
   position: relative;
 }
 
-.logs-table-card :deep(.p-card-content),
-.logs-table-card :deep(.p-card-body) {
-  padding: 0;
+.table-content {
   flex: 1;
   display: flex;
   flex-direction: column;
@@ -257,8 +229,9 @@ onUnmounted(() => {
   gap: 8px;
   font-weight: 600;
   color: var(--p-text-color);
-  padding: 12px 16px;
+  padding: 1rem;
   border-bottom: 1px solid var(--p-surface-border);
+  font-size: 1.125rem;
 }
 
 .logs-table {
@@ -395,5 +368,31 @@ onUnmounted(() => {
   font-weight: 500;
   margin: 0;
   text-align: center;
+}
+
+/* DataTable header styling */
+.logs-table :deep(.p-datatable-thead > tr > th) {
+  background: var(--p-surface-card) !important;
+  color: var(--p-text-color) !important;
+  border-bottom: 1px solid var(--p-surface-border) !important;
+  font-weight: 600;
+}
+
+.logs-table :deep(.p-datatable-tbody > tr) {
+  background: var(--p-surface-card) !important;
+  border-bottom: 1px solid var(--p-surface-border) !important;
+}
+
+.logs-table :deep(.p-datatable-tbody > tr:hover) {
+  background: var(--p-surface-hover) !important;
+}
+
+.logs-table :deep(.p-datatable-tbody > tr.p-highlight) {
+  background: var(--p-primary-50) !important;
+  color: var(--p-primary-700) !important;
+}
+
+.logs-table :deep(.p-datatable-tbody > tr.p-highlight:hover) {
+  background: var(--p-primary-100) !important;
 }
 </style>

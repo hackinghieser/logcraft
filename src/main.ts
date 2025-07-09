@@ -1,23 +1,112 @@
 import { createApp } from "vue";
 import App from "./App.vue";
 import PrimeVue from "primevue/config";
-import Lara from "@primevue/themes/lara";
+import { definePreset } from "@primevue/themes";
+import Aura from "@primevue/themes/aura";
 import Tooltip from "primevue/tooltip";
 import "primeicons/primeicons.css";
+
+const LogcraftPreset = definePreset(Aura, {
+  semantic: {
+    primary: {
+      50: "{orange.50}",
+      100: "{orange.100}",
+      200: "{orange.200}",
+      300: "{orange.300}",
+      400: "{orange.400}",
+      500: "{orange.500}",
+      600: "{orange.600}",
+      700: "{orange.700}",
+      800: "{orange.800}",
+      900: "{orange.900}",
+      950: "{orange.950}"
+    },
+    surface: {
+      0: "{slate.0}",
+      50: "{slate.50}",
+      100: "{slate.100}",
+      200: "{slate.200}",
+      300: "{slate.300}",
+      400: "{slate.400}",
+      500: "{slate.500}",
+      600: "{slate.600}",
+      700: "{slate.700}",
+      800: "{slate.800}",
+      900: "{slate.900}",
+      950: "{slate.950}"
+    }
+  },
+  light: {
+    primary: {
+      50: "{orange.50}",
+      100: "{orange.100}",
+      200: "{orange.200}",
+      300: "{orange.300}",
+      400: "{orange.400}",
+      500: "{orange.500}",
+      600: "{orange.600}",
+      700: "{orange.700}",
+      800: "{orange.800}",
+      900: "{orange.900}",
+      950: "{orange.950}"
+    },
+    surface: {
+      0: "{slate.0}",
+      50: "{slate.50}",
+      100: "{slate.100}",
+      200: "{slate.200}",
+      300: "{slate.300}",
+      400: "{slate.400}",
+      500: "{slate.500}",
+      600: "{slate.600}",
+      700: "{slate.700}",
+      800: "{slate.800}",
+      900: "{slate.900}",
+      950: "{slate.950}"
+    }
+  },
+  dark: {
+    primary: {
+      50: "{orange.950}",
+      100: "{orange.900}",
+      200: "{orange.800}",
+      300: "{orange.700}",
+      400: "{orange.600}",
+      500: "{orange.500}",
+      600: "{orange.400}",
+      700: "{orange.300}",
+      800: "{orange.200}",
+      900: "{orange.100}",
+      950: "{orange.50}"
+    },
+    surface: {
+      0: "{slate.950}",
+      50: "{slate.900}",
+      100: "{slate.800}",
+      200: "{slate.700}",
+      300: "{slate.600}",
+      400: "{slate.500}",
+      500: "{slate.400}",
+      600: "{slate.300}",
+      700: "{slate.200}",
+      800: "{slate.100}",
+      900: "{slate.50}",
+      950: "{slate.0}"
+    }
+  }
+});
 
 const app = createApp(App);
 app.use(PrimeVue, {
   theme: {
-    preset: Lara,
+    preset: LogcraftPreset,
     options: {
       prefix: "p",
-      darkModeSelector: false,
+      darkModeSelector: ".dark-theme",
       cssLayer: false,
     },
   },
 });
-
-// Theme colors and surface colors will be set dynamically by the theme system
 
 // Add dark mode support
 const darkModeMediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
@@ -27,102 +116,17 @@ let themeMode: "system" | "light" | "dark" = "system";
 
 function updateTheme(isDark: boolean) {
   if (isDark) {
-    // Dark mode surface colors
-    document.documentElement.style.setProperty("--p-surface-0", "#0f172a");
-    document.documentElement.style.setProperty("--p-surface-50", "#1e293b");
-    document.documentElement.style.setProperty("--p-surface-100", "#334155");
-    document.documentElement.style.setProperty("--p-surface-200", "#475569");
-    document.documentElement.style.setProperty("--p-surface-300", "#64748b");
-    document.documentElement.style.setProperty("--p-surface-400", "#94a3b8");
-    document.documentElement.style.setProperty("--p-surface-500", "#cbd5e1");
-    document.documentElement.style.setProperty("--p-surface-600", "#e2e8f0");
-    document.documentElement.style.setProperty("--p-surface-700", "#f1f5f9");
-    document.documentElement.style.setProperty("--p-surface-800", "#f8fafc");
-    document.documentElement.style.setProperty("--p-surface-900", "#ffffff");
-    document.documentElement.style.setProperty("--p-surface-950", "#ffffff");
-
-    // Dark mode semantic colors
-    document.documentElement.style.setProperty("--p-surface-ground", "#0f172a");
-    document.documentElement.style.setProperty("--p-surface-card", "#1e293b");
-    document.documentElement.style.setProperty("--p-surface-border", "#334155");
-    document.documentElement.style.setProperty("--p-surface-hover", "#334155");
-
-    // Dark mode text colors
-    document.documentElement.style.setProperty("--p-text-color", "#f1f5f9");
-    document.documentElement.style.setProperty(
-      "--p-text-muted-color",
-      "#94a3b8",
-    );
-    document.documentElement.style.setProperty(
-      "--p-text-secondary-color",
-      "#cbd5e1",
-    );
-
-    // Dark mode primary colors (darker oranges for better contrast)
-    document.documentElement.style.setProperty("--p-primary-50", "#431407");
-    document.documentElement.style.setProperty("--p-primary-100", "#7c2d12");
-    document.documentElement.style.setProperty("--p-primary-200", "#9a3412");
-    document.documentElement.style.setProperty("--p-primary-300", "#c2410c");
-    document.documentElement.style.setProperty("--p-primary-400", "#ea580c");
-    document.documentElement.style.setProperty("--p-primary-500", "#f97316");
-    document.documentElement.style.setProperty("--p-primary-600", "#fb923c");
-    document.documentElement.style.setProperty("--p-primary-700", "#fdba74");
-    document.documentElement.style.setProperty("--p-primary-800", "#fed7aa");
-    document.documentElement.style.setProperty("--p-primary-900", "#ffedd5");
-    document.documentElement.style.setProperty("--p-primary-950", "#fff7ed");
-
-    // Add dark theme class to body for CSS targeting
-    document.body.classList.add("dark-theme");
-    document.body.classList.remove("light-theme");
+    document.documentElement.classList.add("dark-theme");
+    document.documentElement.classList.remove("light-theme");
   } else {
-    // Light mode surface colors (restore defaults)
-    document.documentElement.style.setProperty("--p-surface-0", "#ffffff");
-    document.documentElement.style.setProperty("--p-surface-50", "#f8fafc");
-    document.documentElement.style.setProperty("--p-surface-100", "#f1f5f9");
-    document.documentElement.style.setProperty("--p-surface-200", "#e2e8f0");
-    document.documentElement.style.setProperty("--p-surface-300", "#cbd5e1");
-    document.documentElement.style.setProperty("--p-surface-400", "#94a3b8");
-    document.documentElement.style.setProperty("--p-surface-500", "#64748b");
-    document.documentElement.style.setProperty("--p-surface-600", "#475569");
-    document.documentElement.style.setProperty("--p-surface-700", "#334155");
-    document.documentElement.style.setProperty("--p-surface-800", "#1e293b");
-    document.documentElement.style.setProperty("--p-surface-900", "#0f172a");
-    document.documentElement.style.setProperty("--p-surface-950", "#020617");
-
-    // Light mode semantic colors
-    document.documentElement.style.setProperty("--p-surface-ground", "#f8fafc");
-    document.documentElement.style.setProperty("--p-surface-card", "#ffffff");
-    document.documentElement.style.setProperty("--p-surface-border", "#e2e8f0");
-    document.documentElement.style.setProperty("--p-surface-hover", "#f1f5f9");
-
-    // Light mode text colors
-    document.documentElement.style.setProperty("--p-text-color", "#1e293b");
-    document.documentElement.style.setProperty(
-      "--p-text-muted-color",
-      "#64748b",
-    );
-    document.documentElement.style.setProperty(
-      "--p-text-secondary-color",
-      "#475569",
-    );
-
-    // Light mode primary colors (restore original oranges)
-    document.documentElement.style.setProperty("--p-primary-50", "#fff7ed");
-    document.documentElement.style.setProperty("--p-primary-100", "#ffedd5");
-    document.documentElement.style.setProperty("--p-primary-200", "#fed7aa");
-    document.documentElement.style.setProperty("--p-primary-300", "#fdba74");
-    document.documentElement.style.setProperty("--p-primary-400", "#fb923c");
-    document.documentElement.style.setProperty("--p-primary-500", "#f97316");
-    document.documentElement.style.setProperty("--p-primary-600", "#ea580c");
-    document.documentElement.style.setProperty("--p-primary-700", "#c2410c");
-    document.documentElement.style.setProperty("--p-primary-800", "#9a3412");
-    document.documentElement.style.setProperty("--p-primary-900", "#7c2d12");
-    document.documentElement.style.setProperty("--p-primary-950", "#431407");
-
-    // Add light theme class to body for CSS targeting
-    document.body.classList.add("light-theme");
-    document.body.classList.remove("dark-theme");
+    document.documentElement.classList.add("light-theme");
+    document.documentElement.classList.remove("dark-theme");
   }
+  
+  // Force a repaint to ensure theme changes are applied
+  document.body.style.display = 'none';
+  document.body.offsetHeight; // Trigger reflow
+  document.body.style.display = '';
 }
 
 // Theme management functions
@@ -135,8 +139,11 @@ function applyCurrentTheme() {
 }
 
 function toggleTheme() {
-  themeMode =
-    themeMode === "light" ? "dark" : themeMode === "dark" ? "system" : "light";
+  // Simple two-state toggle: light <-> dark
+  const currentIsDark = themeMode === "dark" || 
+    (themeMode === "system" && darkModeMediaQuery.matches);
+  
+  themeMode = currentIsDark ? "light" : "dark";
   applyCurrentTheme();
   return themeMode;
 }

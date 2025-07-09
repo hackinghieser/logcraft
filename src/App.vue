@@ -347,7 +347,7 @@ onUnmounted(() => {
         </SplitterPanel>
 
         <!-- Details Panel -->
-        <SplitterPanel :size="30" :min-size="25">
+        <SplitterPanel :size="30" :min-size="35">
           <DetailsPanel :selected-entry="selectedEntry" />
         </SplitterPanel>
       </Splitter>
@@ -394,7 +394,7 @@ onUnmounted(() => {
   background: var(--p-surface-0);
   padding: 2rem;
   border-radius: 8px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 12px var(--p-surface-border);
   z-index: 1000;
   pointer-events: none;
 }
@@ -445,7 +445,7 @@ body {
 
 .p-card {
   border: none;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 8px var(--p-surface-border);
 }
 
 .p-card .p-card-content {
