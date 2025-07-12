@@ -18,8 +18,9 @@ withDefaults(defineProps<Props>(), {
 const copiedField = ref<string | null>(null);
 
 function getLevelSeverity(
-  level: string,
+  level?: string,
 ): "success" | "info" | "warning" | "danger" {
+  if (!level) return "info";
   switch (level.toLowerCase()) {
     case "error":
       return "danger";
@@ -34,12 +35,14 @@ function getLevelSeverity(
   }
 }
 
-function formatTimestamp(timestamp: string): string {
+function formatTimestamp(timestamp?: string): string {
+  if (!timestamp) return '';
   return new Date(timestamp).toLocaleString();
 }
 
-async function copyToClipboard(text: string, fieldName: string) {
+async function copyToClipboard(text: string | undefined, fieldName: string) {
   try {
+    if (!text) return;
     await navigator.clipboard.writeText(text);
     copiedField.value = fieldName;
     // Clear the feedback after 2 seconds
@@ -49,6 +52,24 @@ async function copyToClipboard(text: string, fieldName: string) {
   } catch (error) {
     console.error("Failed to copy to clipboard:", error);
   }
+}
+
+function hasAdditionalProperties(entry: LogEntry): boolean {
+  const knownKeys = ['@t', '@m', '@mt', '@l', '@x', '@i', '@r'];
+  return Object.keys(entry).some(key => !knownKeys.includes(key));
+}
+
+function getAdditionalProperties(entry: LogEntry): Record<string, any> {
+  const knownKeys = ['@t', '@m', '@mt', '@l', '@x', '@i', '@r'];
+  const additionalProps: Record<string, any> = {};
+  
+  Object.keys(entry).forEach(key => {
+    if (!knownKeys.includes(key)) {
+      additionalProps[key] = (entry as any)[key];
+    }
+  });
+  
+  return additionalProps;
 }
 </script>
 
@@ -95,7 +116,7 @@ async function copyToClipboard(text: string, fieldName: string) {
                 class="copy-btn"
                 @click="
                   copyToClipboard(
-                    formatTimestamp(selectedEntry.timestamp),
+                    formatTimestamp(selectedEntry['@t']),
                     'timestamp',
                   )
                 " />
@@ -251,7 +272,41 @@ async function copyToClipboard(text: string, fieldName: string) {
               size="small"
               text
               class="copy-btn"
-              @click="copyToClipboard(selectedEntry['@x']!, 'exception')" />
+              @click="copyToClipboard(selectedEntry['@x'], 'exception')" />
+          </div>
+        </Panel>
+
+        <!-- Properties Panel (from LogEntry type) -->
+        <Panel
+          v-if="selectedEntry && hasAdditionalProperties(selectedEntry)"
+          header="Additional Properties"
+          style="margin-top: 1rem">
+          <div style="display: flex; flex-direction: column; gap: 0.75rem">
+            <div
+              v-for="(value, key) in getAdditionalProperties(selectedEntry)"
+              :key="key"
+              class="hover-copy-container property-row">
+              <div class="property-header">
+                <div class="property-key">
+                  <i class="pi pi-key" />
+                  <span>{{ key }}:</span>
+                </div>
+                <Button
+                  v-tooltip.top="
+                    copiedField === `property-${key}` ? 'Copied!' : `Copy ${key}`
+                  "
+                  :icon="copiedField === `property-${key}` ? 'pi pi-check' : 'pi pi-copy'"
+                  :severity="copiedField === `property-${key}` ? 'success' : 'secondary'"
+                  size="small"
+                  text
+                  class="copy-btn"
+                  @click="copyToClipboard(typeof value === 'object' ? JSON.stringify(value, null, 2) : String(value), `property-${key}`)" />
+              </div>
+              <div class="property-value">
+                <pre v-if="typeof value === 'object'" style="margin: 0; white-space: pre-wrap">{{ JSON.stringify(value, null, 2) }}</pre>
+                <span v-else>{{ value }}</span>
+              </div>
+            </div>
           </div>
         </Panel>
       </div>
@@ -304,5 +359,34 @@ async function copyToClipboard(text: string, fieldName: string) {
   flex: 1;
   padding: 1rem;
   overflow-y: auto;
+}
+
+.property-row {
+  border: 1px solid var(--p-surface-border);
+  border-radius: 6px;
+  padding: 0.75rem;
+  background: var(--p-surface-card);
+}
+
+.property-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.5rem;
+}
+
+.property-key {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 600;
+  color: var(--p-text-color);
+  font-size: 0.875rem;
+}
+
+.property-value {
+  font-size: 0.875rem;
+  color: var(--p-text-muted-color);
+  line-height: 1.4;
 }
 </style>

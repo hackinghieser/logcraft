@@ -30,13 +30,15 @@ function onRowSelect(event: DataTableRowClickEvent) {
   emit("entrySelect", event.data);
 }
 
-function formatTimestamp(timestamp: string): string {
+function formatTimestamp(timestamp?: string): string {
+  if (!timestamp) return '';
   return new Date(timestamp).toLocaleString();
 }
 
 function getLevelSeverity(
-  level: string,
+  level?: string,
 ): "success" | "info" | "warning" | "danger" {
+  if (!level) return "info";
   switch (level.toLowerCase()) {
     case "error":
       return "danger";
@@ -172,37 +174,38 @@ onUnmounted(() => {
         :selection="selectedEntry"
         selection-mode="single"
         scrollable
+        :virtual
         scroll-height="flex"
         class="logs-table"
         @row-select="onRowSelect">
         <Column
-          field="timestamp"
+          field="@t"
           header="Timestamp"
           :sortable="true"
           style="width: 200px">
           <template #body="slotProps">
             <span class="timestamp">
-              {{ formatTimestamp(slotProps.data.timestamp) }}
+              {{ formatTimestamp(slotProps.data['@t']) }}
             </span>
           </template>
         </Column>
 
         <Column
-          field="level"
+          field="@l"
           header="Level"
           :sortable="true"
           style="width: 100px">
           <template #body="slotProps">
             <Tag
-              :value="slotProps.data.level"
-              :severity="getLevelSeverity(slotProps.data.level)"
+              :value="slotProps.data['@l']"
+              :severity="getLevelSeverity(slotProps.data['@l'])"
               class="level-tag" />
           </template>
         </Column>
 
-        <Column field="message" header="Message" :sortable="true">
+        <Column field="@m" header="Message" :sortable="true">
           <template #body="slotProps">
-            <span class="message-text">{{ slotProps.data.message }}</span>
+            <span class="message-text">{{ slotProps.data['@m'] }}</span>
           </template>
         </Column>
 

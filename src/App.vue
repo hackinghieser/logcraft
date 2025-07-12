@@ -131,7 +131,7 @@ async function loadMoreEntries() {
       filePath: currentLogFile.path,
       page: nextPage,
     })) as LogEntry[];
-    console.log("Got new events");
+    console.log("Got new events", moreEntries);
     if (moreEntries.length > 0) {
       console.log("Push new events");
       logEntries.value.push(...moreEntries);
@@ -170,10 +170,10 @@ async function handleFileOpen(filePath: string) {
     // Parse the selected file (now returns only first page)
     const result = (await invoke("parse_clef_file", { filePath })) as [
       any,
-      LogEntry[],
+      any[],
     ];
     const [fileInfo, events] = result;
-
+    console.log(result)
     // Update the application state
     logFile.value = {
       path: fileInfo.path,
@@ -183,6 +183,7 @@ async function handleFileOpen(filePath: string) {
     };
 
     logEntries.value = events;
+    console.log(logEntries)
     //applyFilters(); // Apply filters after initial load
     selectedEntry.value = events.length > 0 ? events[0] : null;
 
@@ -218,7 +219,7 @@ function applyFilters() {
   // Filter by log levels
   if (filters.selectedLevels.length > 0) {
     filtered = filtered.filter((entry) =>
-      filters.selectedLevels.includes(entry.level),
+      filters.selectedLevels.includes(entry['@l'] || ''),
     );
   }
 
@@ -227,9 +228,9 @@ function applyFilters() {
     const searchTerm = filters.searchText.toLowerCase();
     filtered = filtered.filter(
       (entry) =>
-        entry.message.toLowerCase().includes(searchTerm) ||
-        entry.template?.toLowerCase().includes(searchTerm) ||
-        entry.level.toLowerCase().includes(searchTerm),
+        entry['@m']?.toLowerCase().includes(searchTerm) ||
+        entry['@mt']?.toLowerCase().includes(searchTerm) ||
+        entry['@l']?.toLowerCase().includes(searchTerm),
     );
   }
 
@@ -237,7 +238,7 @@ function applyFilters() {
   if (filters.dateRange.length === 2) {
     const [startDate, endDate] = filters.dateRange;
     filtered = filtered.filter((entry) => {
-      const entryDate = new Date(entry.timestamp);
+      const entryDate = new Date(entry['@t'] || '');
       return entryDate >= startDate && entryDate <= endDate;
     });
   }
