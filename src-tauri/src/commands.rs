@@ -6,8 +6,6 @@ use std::fs::File;
 use std::io::{BufRead, BufReader};
 use std::path::Path;
 
-const PAGE_SIZE: usize = 5000; // Load 500 entries per page
-
 /// Scan CLEF file to get metadata without loading all entries
 #[tauri::command]
 pub async fn scan_clef_file(file_path: String) -> Result<LogFileInfo, String> {
@@ -42,56 +40,53 @@ pub async fn scan_clef_file(file_path: String) -> Result<LogFileInfo, String> {
     })
 }
 
-/// Load a specific page of log entries
+/// Load all log entries from the file
 #[tauri::command]
-pub async fn load_log_entries_page(file_path: String, page: usize) -> Result<Vec<Event>, String> {
+pub async fn load_all_log_entries(file_path: String) -> Result<Vec<Event>, String> {
     // Validate file exists and is accessible
     if !Path::new(&file_path).exists() {
         return Err(format!("File does not exist: {file_path}"));
     }
 
-    println!("Reading file");
+    println!("Reading entire file: {}", file_path);
 
     let file = File::open(&file_path).map_err(|e| format!("Failed to open file: {e}"))?;
-
     let reader = BufReader::new(file);
 
-    let skip_count = page * PAGE_SIZE;
-    // Read only the lines we need for this page
-    let page_lines: Vec<String> = reader
+    // Read all lines from the file
+    let all_lines: Vec<String> = reader
         .lines()
-        .skip(skip_count)
-        .take(PAGE_SIZE)
         .map(|line| line.unwrap_or_default())
         .filter(|line| !line.trim().is_empty())
         .collect();
 
-    if page_lines.is_empty() {
+    if all_lines.is_empty() {
         return Ok(Vec::new());
     }
 
-    // Parse only this page of lines
+    println!("Read {} lines, starting parse", all_lines.len());
+
+    // Parse all lines
     let options = CleverParserOptions {
         ignore_errors: Some(true),
         debug: Some(false),
     };
 
-    println!("Start parsing");
-    let collection = EventCollection::create(&page_lines, Some(&options))
+    let collection = EventCollection::create(&all_lines, Some(&options))
         .map_err(|e| format!("Failed to parse CLEF file: {e}"))?;
 
-    println!("Events parsed");
+    println!("Parsed {} events", collection.events.len());
     Ok(collection.events)
 }
 
-/// Parse CLEF file and return initial page of log data (backwards compatibility)
+/// Parse CLEF file and return all log data
 #[tauri::command]
 pub async fn parse_clef_file(file_path: String) -> Result<(LogFileInfo, Vec<Event>), String> {
     // First scan the file to get metadata
     let log_file_info = scan_clef_file(file_path.clone()).await?;
 
-    // Then load the first page of entries
-    let first_page_entries = load_log_entries_page(file_path, 0).await?;
-
-    Ok((log_file_info, first_page_entries))
+    // Then load all entries from the file
+    let all_entries = load_all_log_entries(file_path).await?;
+    println!("Returning {} events", all_entries.len());
+    Ok((log_file_info, all_entries))
 }

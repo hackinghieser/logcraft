@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted, nextTick, watch } from "vue";
+import { ref, computed } from "vue";
 import DataTable, { DataTableRowClickEvent } from "primevue/datatable";
 import Column from "primevue/column";
 import Button from "primevue/button";
@@ -26,7 +26,21 @@ const emit = defineEmits<{
   loadMore: [];
 }>();
 
+// Pagination state
+const currentPage = ref(0);
+const rowsPerPage = 1000;
+
 function onRowSelect(event: DataTableRowClickEvent) {
+  emit("entrySelect", event.data);
+}
+
+function onSelectionChange(event: any) {
+  if (event.value) {
+    emit("entrySelect", event.value);
+  }
+}
+
+function onRowClick(event: any) {
   emit("entrySelect", event.data);
 }
 
@@ -53,99 +67,16 @@ function getLevelSeverity(
   }
 }
 
-// Scroll-based pagination
+// DataTable ref
 const dataTableRef = ref<any>(null);
 
-function handleScroll(event: Event) {
-  if (props.loadingMore || !props.hasMorePages || props.loading) {
-    return;
-  }
+// Compute total rows for pagination
+const totalRecords = computed(() => props.logEntries.length);
 
-  const element = event.target as HTMLElement;
-  const threshold = 200; // Trigger load when 200px from bottom (earlier)
-
-  if (
-    element.scrollTop + element.clientHeight >=
-    element.scrollHeight - threshold
-  ) {
-    emit("loadMore");
-  }
+// Handle page change (simplified - no more backend loading needed)
+function onPageChange(event: any) {
+  currentPage.value = event.page;
 }
-
-let scrollElement: HTMLElement | null = null;
-
-const setupScrollListener = async () => {
-  // Wait for the DOM to be fully updated
-  await nextTick();
-
-  // Remove existing listener if any
-  if (scrollElement) {
-    scrollElement.removeEventListener("scroll", handleScroll);
-    scrollElement = null;
-  }
-
-  // Method 1: Via DataTable ref
-  if (dataTableRef.value && dataTableRef.value.$el) {
-    const wrapper = dataTableRef.value.$el.querySelector(
-      ".p-datatable-wrapper",
-    );
-    if (wrapper) {
-      scrollElement = wrapper as HTMLElement;
-      wrapper.addEventListener("scroll", handleScroll, { passive: true });
-      return true;
-    }
-  }
-
-  // Method 2: Direct class search
-  const wrapper = document.querySelector(".p-datatable-wrapper");
-  if (wrapper) {
-    scrollElement = wrapper as HTMLElement;
-    wrapper.addEventListener("scroll", handleScroll, { passive: true });
-    return true;
-  }
-
-  // Method 3: Look for any element with overflow
-  const scrollables = document.querySelectorAll(
-    '[style*="overflow"], .p-datatable-wrapper',
-  );
-  for (const element of scrollables) {
-    const styles = window.getComputedStyle(element);
-    if (styles.overflow === "auto" || styles.overflowY === "auto") {
-      scrollElement = element as HTMLElement;
-      element.addEventListener("scroll", handleScroll, { passive: true });
-      return true;
-    }
-  }
-
-  return false;
-};
-
-// Watch for when logEntries change (data is loaded) and setup scroll listener
-watch(
-  () => props.logEntries.length,
-  async (newLength) => {
-    if (newLength > 0) {
-      await setupScrollListener();
-    }
-  },
-);
-
-onMounted(async () => {
-  // Try multiple times with different delays
-  for (let attempt = 0; attempt < 5; attempt++) {
-    await new Promise((resolve) => setTimeout(resolve, attempt * 200));
-    if (await setupScrollListener()) {
-      break;
-    }
-  }
-});
-
-onUnmounted(() => {
-  if (scrollElement) {
-    scrollElement.removeEventListener("scroll", handleScroll);
-    scrollElement = null;
-  }
-});
 </script>
 
 <template>
@@ -173,11 +104,20 @@ onUnmounted(() => {
         :value="logEntries"
         :selection="selectedEntry"
         selection-mode="single"
+        data-key="@t"
+        paginator
+        :rows="rowsPerPage"
+        :total-records="totalRecords"
+        :first="currentPage * rowsPerPage"
+        :paginator-template="'FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown'"
+        current-page-report-template="Showing {first} to {last} of {totalRecords} entries"
         scrollable
-        :virtual
         scroll-height="flex"
         class="logs-table"
-        @row-select="onRowSelect">
+        @row-select="onRowSelect"
+        @selection-change="onSelectionChange"
+        @row-click="onRowClick"
+        @page="onPageChange">
         <Column
           field="@t"
           header="Timestamp"
@@ -220,14 +160,6 @@ onUnmounted(() => {
           </template>
         </Column>
       </DataTable>
-
-      <!-- Loading More Indicator -->
-      <div v-if="loadingMore" class="loading-more-container">
-        <div class="loading-more-spinner">
-          <div class="spinner-ring" />
-        </div>
-        <p class="loading-more-text">Loading more entries...</p>
-      </div>
     </div>
   </div>
 </template>
@@ -361,40 +293,6 @@ onUnmounted(() => {
   letter-spacing: 0.5px;
 }
 
-/* Loading More Indicator */
-.loading-more-container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 20px;
-  border-top: 1px solid var(--p-surface-border);
-  background: var(--p-surface-card);
-}
-
-.loading-more-spinner {
-  position: relative;
-  width: 30px;
-  height: 30px;
-  margin-bottom: 12px;
-}
-
-.loading-more-spinner .spinner-ring {
-  position: absolute;
-  width: 30px;
-  height: 30px;
-  border-radius: 50%;
-  border: 2px solid transparent;
-  border-top: 2px solid var(--p-primary-500);
-  animation: spin 1s linear infinite;
-}
-
-.loading-more-text {
-  color: var(--p-text-muted-color);
-  font-size: 14px;
-  font-weight: 500;
-  margin: 0;
-  text-align: center;
-}
 
 /* DataTable header styling */
 .logs-table :deep(.p-datatable-thead > tr > th) {
@@ -414,11 +312,80 @@ onUnmounted(() => {
 }
 
 .logs-table :deep(.p-datatable-tbody > tr.p-highlight) {
-  background: var(--p-primary-50) !important;
-  color: var(--p-primary-700) !important;
+  background: var(--p-surface-100) !important;
+  color: var(--p-text-color) !important;
+  border-left: 4px solid var(--p-surface-400) !important;
+  box-shadow: inset 0 0 0 1px var(--p-surface-300) !important;
+  font-weight: 600 !important;
 }
 
 .logs-table :deep(.p-datatable-tbody > tr.p-highlight:hover) {
-  background: var(--p-primary-100) !important;
+  background: var(--p-surface-200) !important;
+  color: var(--p-text-color) !important;
+  border-left: 4px solid var(--p-surface-500) !important;
+}
+
+.logs-table :deep(.p-datatable-tbody > tr.p-highlight td) {
+  border-color: var(--p-surface-300) !important;
+}
+
+/* Enhanced row hover effect */
+.logs-table :deep(.p-datatable-tbody > tr:hover:not(.p-highlight)) {
+  background: var(--p-surface-hover) !important;
+  cursor: pointer;
+}
+
+/* Additional selection styling for better visibility */
+.logs-table :deep(.p-datatable-tbody > tr.p-highlight) {
+  position: relative;
+}
+
+.logs-table :deep(.p-datatable-tbody > tr.p-highlight)::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  background: var(--p-surface-500);
+  z-index: 1;
+}
+
+/* Dark mode improvements */
+@media (prefers-color-scheme: dark) {
+  .logs-table :deep(.p-datatable-tbody > tr.p-highlight) {
+    background: rgba(255, 255, 255, 0.1) !important;
+    border-left: 4px solid #6b7280 !important;
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.1) !important;
+  }
+  
+  .logs-table :deep(.p-datatable-tbody > tr.p-highlight:hover) {
+    background: rgba(255, 255, 255, 0.15) !important;
+    border-left: 4px solid #9ca3af !important;
+  }
+}
+
+/* Paginator styling */
+.logs-table :deep(.p-paginator) {
+  background: var(--p-surface-card) !important;
+  border-top: 1px solid var(--p-surface-border) !important;
+  padding: 0.75rem 1rem !important;
+  border-radius: 0 0 6px 6px !important;
+}
+
+.logs-table :deep(.p-paginator .p-paginator-current) {
+  color: var(--p-text-muted-color) !important;
+  font-size: 0.875rem !important;
+}
+
+.logs-table :deep(.p-paginator .p-paginator-pages .p-paginator-page) {
+  min-width: 2.5rem !important;
+  height: 2.5rem !important;
+  border-radius: 4px !important;
+}
+
+.logs-table :deep(.p-paginator .p-paginator-pages .p-paginator-page.p-highlight) {
+  background: var(--p-primary-500) !important;
+  color: white !important;
 }
 </style>

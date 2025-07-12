@@ -1,7 +1,7 @@
 mod models;
 mod commands;
 
-use commands::{parse_clef_file, scan_clef_file, load_log_entries_page};
+use commands::{parse_clef_file, scan_clef_file, load_all_log_entries};
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
@@ -12,7 +12,7 @@ pub fn run() {
         .invoke_handler(tauri::generate_handler![
             parse_clef_file,
             scan_clef_file,
-            load_log_entries_page
+            load_all_log_entries
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

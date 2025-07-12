@@ -28,9 +28,8 @@ const currentFilters = ref<Filters>({
   dateRange: [],
 });
 
-// Pagination state
-const currentPage = ref(0);
-const hasMorePages = ref(true);
+// Loading state (pagination removed - now loads entire file)
+const hasMorePages = ref(false);
 const loadingMore = ref(false);
 
 // Sample data for development
@@ -112,46 +111,10 @@ async function handleFileDropped(filePath: string) {
   }
 }
 
-// Load more log entries from the next page (non-blocking)
+// Load more function (now deprecated - kept for compatibility)
 async function loadMoreEntries() {
-  if (!logFile.value || loadingMore.value || !hasMorePages.value) {
-    return;
-  }
-
-  loadingMore.value = true;
-  const currentLogFile = logFile.value; // Store reference to avoid null check issues
-
-  // Load in background without blocking UI
-  try {
-    const { invoke } = await import("@tauri-apps/api/core");
-
-    const nextPage = currentPage.value + 1;
-    console.log("Invoke parsing");
-    const moreEntries = (await invoke("load_log_entries_page", {
-      filePath: currentLogFile.path,
-      page: nextPage,
-    })) as LogEntry[];
-    console.log("Got new events", moreEntries);
-    if (moreEntries.length > 0) {
-      console.log("Push new events");
-      logEntries.value.push(...moreEntries);
-      currentPage.value = nextPage;
-      console.log("Events pushed");
-      //applyFilters(); // Re-apply filters after loading more entries
-
-      // Check if we've loaded all entries
-      if (logEntries.value.length >= currentLogFile.totalCount) {
-        hasMorePages.value = false;
-      }
-    } else {
-      hasMorePages.value = false;
-    }
-  } catch (error) {
-    console.error("Failed to load more entries:", error);
-  } finally {
-    console.log("Loading more false");
-    loadingMore.value = false;
-  }
+  // No longer needed since we load the entire file at once
+  console.log("loadMoreEntries called but pagination is disabled - entire file is already loaded");
 }
 
 // Extract file opening logic to reuse for both dialog and drag & drop
@@ -162,12 +125,11 @@ async function handleFileOpen(filePath: string) {
     // Import Tauri APIs
     const { invoke } = await import("@tauri-apps/api/core");
 
-    // Reset pagination state
-    currentPage.value = 0;
-    hasMorePages.value = true;
+    // Reset loading state
+    hasMorePages.value = false;
     loadingMore.value = false;
 
-    // Parse the selected file (now returns only first page)
+    // Parse the selected file (now returns all entries)
     const result = (await invoke("parse_clef_file", { filePath })) as [
       any,
       any[],
@@ -187,11 +149,11 @@ async function handleFileOpen(filePath: string) {
     //applyFilters(); // Apply filters after initial load
     selectedEntry.value = events.length > 0 ? events[0] : null;
 
-    // Check if there are more pages to load
-    hasMorePages.value = events.length < fileInfo.total_count;
+    // No more pagination needed - entire file is loaded
+    hasMorePages.value = false;
 
     console.log(
-      `Loaded first page: ${events.length} of ${fileInfo.total_count} log entries from ${fileInfo.path}`,
+      `Loaded entire file: ${events.length} log entries from ${fileInfo.path}`,
     );
   } catch (error) {
     console.error("Failed to parse log file:", error);
@@ -340,7 +302,7 @@ onUnmounted(() => {
     <div class="main-content">
       <Splitter>
         <!-- Log Table -->
-        <SplitterPanel :size="70" :min-size="50">
+        <SplitterPanel :size="80" :min-size="60">
           <LogTable
             :log-entries="logEntries"
             :selected-entry="selectedEntry"
@@ -352,7 +314,7 @@ onUnmounted(() => {
         </SplitterPanel>
 
         <!-- Details Panel -->
-        <SplitterPanel :size="30" :min-size="35">
+        <SplitterPanel :size="20" :min-size="25">
           <DetailsPanel :selected-entry="selectedEntry" />
         </SplitterPanel>
       </Splitter>

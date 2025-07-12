@@ -6,4 +6,5 @@ export default interface LogEntry {
   "@x"?: string;
   "@i"?: string;
   "@r": string[];
+  "properties": Record<string, any>
 }
