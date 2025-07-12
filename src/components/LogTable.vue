@@ -3,7 +3,6 @@ import { ref, onMounted, onUnmounted, nextTick, watch } from "vue";
 import DataTable, { DataTableRowClickEvent } from "primevue/datatable";
 import Column from "primevue/column";
 import Button from "primevue/button";
-import Card from "primevue/card";
 import Tag from "primevue/tag";
 import LogEntry from "../types/LogEntry";
 

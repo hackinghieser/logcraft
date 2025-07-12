@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted } from "vue";
+import { ref, onMounted, onUnmounted, markRaw } from "vue";
 import Splitter from "primevue/splitter";
 import SplitterPanel from "primevue/splitterpanel";
 
@@ -122,38 +122,41 @@ async function loadMoreEntries() {
   const currentLogFile = logFile.value; // Store reference to avoid null check issues
 
   // Load in background without blocking UI
-  setTimeout(async () => {
-    try {
-      const { invoke } = await import("@tauri-apps/api/core");
+  try {
+    const { invoke } = await import("@tauri-apps/api/core");
 
-      const nextPage = currentPage.value + 1;
-      const moreEntries = (await invoke("load_log_entries_page", {
-        filePath: currentLogFile.path,
-        page: nextPage,
-      })) as LogEntry[];
+    const nextPage = currentPage.value + 1;
+    console.log("Invoke parsing");
+    const moreEntries = (await invoke("load_log_entries_page", {
+      filePath: currentLogFile.path,
+      page: nextPage,
+    })) as LogEntry[];
+    console.log("Got new events");
+    if (moreEntries.length > 0) {
+      console.log("Push new events");
+      logEntries.value.push(...moreEntries);
+      currentPage.value = nextPage;
+      console.log("Events pushed");
+      //applyFilters(); // Re-apply filters after loading more entries
 
-      if (moreEntries.length > 0) {
-        logEntries.value.push(...moreEntries);
-        currentPage.value = nextPage;
-        applyFilters(); // Re-apply filters after loading more entries
-
-        // Check if we've loaded all entries
-        if (logEntries.value.length >= currentLogFile.totalCount) {
-          hasMorePages.value = false;
-        }
-      } else {
+      // Check if we've loaded all entries
+      if (logEntries.value.length >= currentLogFile.totalCount) {
         hasMorePages.value = false;
       }
-    } catch (error) {
-      console.error("Failed to load more entries:", error);
-    } finally {
-      loadingMore.value = false;
+    } else {
+      hasMorePages.value = false;
     }
-  }, 0);
+  } catch (error) {
+    console.error("Failed to load more entries:", error);
+  } finally {
+    console.log("Loading more false");
+    loadingMore.value = false;
+  }
 }
 
 // Extract file opening logic to reuse for both dialog and drag & drop
 async function handleFileOpen(filePath: string) {
+  console.log("Start loading");
   loading.value = true;
   try {
     // Import Tauri APIs
@@ -180,7 +183,7 @@ async function handleFileOpen(filePath: string) {
     };
 
     logEntries.value = events;
-    applyFilters(); // Apply filters after initial load
+    //applyFilters(); // Apply filters after initial load
     selectedEntry.value = events.length > 0 ? events[0] : null;
 
     // Check if there are more pages to load
@@ -193,6 +196,7 @@ async function handleFileOpen(filePath: string) {
     console.error("Failed to parse log file:", error);
     alert(`Failed to parse log file: ${error}`);
   } finally {
+    console.log("Finished loading, false");
     loading.value = false;
   }
 }
@@ -337,7 +341,7 @@ onUnmounted(() => {
         <!-- Log Table -->
         <SplitterPanel :size="70" :min-size="50">
           <LogTable
-            :log-entries="filteredEntries"
+            :log-entries="logEntries"
             :selected-entry="selectedEntry"
             :loading="loading"
             :has-more-pages="hasMorePages"

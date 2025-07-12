@@ -1,11 +1,12 @@
-use crate::models::{LogFileInfo, SerializableEvent};
+use crate::models::LogFileInfo;
 use cleverlib::clever_parser_options::CleverParserOptions;
+use cleverlib::event::Event;
 use cleverlib::event_collection::EventCollection;
 use std::fs::File;
 use std::io::{BufRead, BufReader};
 use std::path::Path;
 
-const PAGE_SIZE: usize = 500; // Load 500 entries per page
+const PAGE_SIZE: usize = 5000; // Load 500 entries per page
 
 /// Scan CLEF file to get metadata without loading all entries
 #[tauri::command]
@@ -43,14 +44,13 @@ pub async fn scan_clef_file(file_path: String) -> Result<LogFileInfo, String> {
 
 /// Load a specific page of log entries
 #[tauri::command]
-pub async fn load_log_entries_page(
-    file_path: String,
-    page: usize,
-) -> Result<Vec<SerializableEvent>, String> {
+pub async fn load_log_entries_page(file_path: String, page: usize) -> Result<Vec<Event>, String> {
     // Validate file exists and is accessible
     if !Path::new(&file_path).exists() {
         return Err(format!("File does not exist: {file_path}"));
     }
+
+    println!("Reading file");
 
     let file = File::open(&file_path).map_err(|e| format!("Failed to open file: {e}"))?;
 
@@ -76,25 +76,17 @@ pub async fn load_log_entries_page(
         debug: Some(false),
     };
 
+    println!("Start parsing");
     let collection = EventCollection::create(&page_lines, Some(&options))
         .map_err(|e| format!("Failed to parse CLEF file: {e}"))?;
 
-    // Convert events to serializable format
-    let serializable_events: Vec<SerializableEvent> = collection
-        .events
-        .iter()
-        .zip(page_lines.iter())
-        .map(|(event, raw_event_str)| SerializableEvent::from((event, raw_event_str.as_str())))
-        .collect();
-
-    Ok(serializable_events)
+    println!("Events parsed");
+    Ok(collection.events)
 }
 
 /// Parse CLEF file and return initial page of log data (backwards compatibility)
 #[tauri::command]
-pub async fn parse_clef_file(
-    file_path: String,
-) -> Result<(LogFileInfo, Vec<SerializableEvent>), String> {
+pub async fn parse_clef_file(file_path: String) -> Result<(LogFileInfo, Vec<Event>), String> {
     // First scan the file to get metadata
     let log_file_info = scan_clef_file(file_path.clone()).await?;
 
@@ -103,4 +95,3 @@ pub async fn parse_clef_file(
 
     Ok((log_file_info, first_page_entries))
 }
-

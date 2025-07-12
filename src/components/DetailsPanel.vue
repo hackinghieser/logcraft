@@ -78,7 +78,7 @@ async function copyToClipboard(text: string, fieldName: string) {
                 <span>Timestamp:</span>
               </div>
               <span style="flex: 1">{{
-                formatTimestamp(selectedEntry.timestamp)
+                formatTimestamp(selectedEntry['@t'])
               }}</span>
               <Button
                 v-tooltip.top="
@@ -116,8 +116,8 @@ async function copyToClipboard(text: string, fieldName: string) {
               </div>
               <div style="flex: 1">
                 <Tag
-                  :value="selectedEntry.level"
-                  :severity="getLevelSeverity(selectedEntry.level)" />
+                  :value="selectedEntry['@l']"
+                  :severity="getLevelSeverity(selectedEntry['@l'])" />
               </div>
               <Button
                 v-tooltip.top="
@@ -128,7 +128,7 @@ async function copyToClipboard(text: string, fieldName: string) {
                 size="small"
                 text
                 class="copy-btn"
-                @click="copyToClipboard(selectedEntry.level, 'level')" />
+                @click="copyToClipboard(selectedEntry['@l'], 'level')" />
             </div>
           </div>
         </Panel>
@@ -139,7 +139,7 @@ async function copyToClipboard(text: string, fieldName: string) {
             class="hover-copy-container"
             style="display: flex; align-items: flex-start; gap: 1rem">
             <pre style="margin: 0; white-space: pre-wrap; flex: 1">{{
-              selectedEntry.message
+              selectedEntry['@m']
             }}</pre>
             <Button
               v-tooltip.top="
@@ -150,19 +150,19 @@ async function copyToClipboard(text: string, fieldName: string) {
               size="small"
               text
               class="copy-btn"
-              @click="copyToClipboard(selectedEntry.message, 'message')" />
+              @click="copyToClipboard(selectedEntry['@m'], 'message')" />
           </div>
         </Panel>
 
         <!-- Event ID Panel -->
         <Panel
-          v-if="selectedEntry.eventId"
+          v-if="selectedEntry['@i']"
           header="Event ID"
           style="margin-top: 1rem">
           <div
             class="hover-copy-container"
             style="display: flex; align-items: center; gap: 1rem">
-            <span style="flex: 1">{{ selectedEntry.eventId }}</span>
+            <span style="flex: 1">{{ selectedEntry['@i'] }}</span>
             <Button
               v-tooltip.top="
                 copiedField === 'eventId' ? 'Copied!' : 'Copy event ID'
@@ -172,20 +172,20 @@ async function copyToClipboard(text: string, fieldName: string) {
               size="small"
               text
               class="copy-btn"
-              @click="copyToClipboard(selectedEntry.eventId!, 'eventId')" />
+              @click="copyToClipboard(selectedEntry['@i']!, 'eventId')" />
           </div>
         </Panel>
 
         <!-- Message Template Panel -->
         <Panel
-          v-if="selectedEntry.template"
+          v-if="selectedEntry['@mt']"
           header="Message Template"
           style="margin-top: 1rem">
           <div
             class="hover-copy-container"
             style="display: flex; align-items: flex-start; gap: 1rem">
             <pre style="margin: 0; white-space: pre-wrap; flex: 1">{{
-              selectedEntry.template
+              selectedEntry['@mt']
             }}</pre>
             <Button
               v-tooltip.top="
@@ -196,36 +196,36 @@ async function copyToClipboard(text: string, fieldName: string) {
               size="small"
               text
               class="copy-btn"
-              @click="copyToClipboard(selectedEntry.template!, 'template')" />
+              @click="copyToClipboard(selectedEntry['@mt']!, 'template')" />
           </div>
         </Panel>
 
-        <!-- Properties Panel -->
+        <!-- Renderings Panel -->
         <Panel
-          v-if="selectedEntry.properties"
-          header="Properties"
+          v-if="selectedEntry['@r'] && selectedEntry['@r'].length > 0"
+          header="Renderings"
           style="margin-top: 1rem">
           <div
             class="hover-copy-container"
             style="display: flex; align-items: flex-start; gap: 1rem">
             <pre style="margin: 0; white-space: pre-wrap; flex: 1">{{
-              JSON.stringify(selectedEntry.properties, null, 2)
+              JSON.stringify(selectedEntry['@r'], null, 2)
             }}</pre>
             <Button
               v-tooltip.top="
-                copiedField === 'properties' ? 'Copied!' : 'Copy properties'
+                copiedField === 'renderings' ? 'Copied!' : 'Copy renderings'
               "
               :icon="
-                copiedField === 'properties' ? 'pi pi-check' : 'pi pi-copy'
+                copiedField === 'renderings' ? 'pi pi-check' : 'pi pi-copy'
               "
-              :severity="copiedField === 'properties' ? 'success' : 'secondary'"
+              :severity="copiedField === 'renderings' ? 'success' : 'secondary'"
               size="small"
               text
               class="copy-btn"
               @click="
                 copyToClipboard(
-                  JSON.stringify(selectedEntry.properties, null, 2),
-                  'properties',
+                  JSON.stringify(selectedEntry['@r'], null, 2),
+                  'renderings',
                 )
               " />
           </div>
@@ -233,14 +233,14 @@ async function copyToClipboard(text: string, fieldName: string) {
 
         <!-- Exception Panel -->
         <Panel
-          v-if="selectedEntry.exception"
+          v-if="selectedEntry['@x']"
           header="Exception"
           style="margin-top: 1rem">
           <div
             class="hover-copy-container"
             style="display: flex; align-items: flex-start; gap: 1rem">
             <pre style="margin: 0; white-space: pre-wrap; flex: 1">{{
-              selectedEntry.exception
+              selectedEntry['@x']
             }}</pre>
             <Button
               v-tooltip.top="
@@ -251,7 +251,7 @@ async function copyToClipboard(text: string, fieldName: string) {
               size="small"
               text
               class="copy-btn"
-              @click="copyToClipboard(selectedEntry.exception!, 'exception')" />
+              @click="copyToClipboard(selectedEntry['@x']!, 'exception')" />
           </div>
         </Panel>
       </div>
