@@ -1,10 +1,10 @@
-name: CI
+name: build-check
 
 on:
   push:
-    branches: [ "main", "feat/*" ]
+    branches: ["main", "feat/*"]
   pull_request:
-    branches: [ "main" ]
+    branches: ["main"]
 
 env:
   CARGO_TERM_COLOR: always
@@ -33,7 +33,7 @@ jobs:
       - name: Rust cache
         uses: swatinem/rust-cache@v2
         with:
-          workspaces: './src-tauri -> target'
+          workspaces: "./src-tauri -> target"
 
       - name: Install frontend dependencies
         run: bun install
@@ -49,3 +49,4 @@ jobs:
 
       - name: Verify Tauri build (without bundling)
         run: bun run tauri build --no-bundle
+
