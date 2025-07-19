@@ -32,7 +32,7 @@ function toggleTheme() {
   <Toolbar class="app-toolbar">
     <template #start>
       <div class="toolbar-left">
-        <h1 class="app-title">LogCraft</h1>
+        <h1 class="app-title">Timber</h1>
         <div v-if="logFile" class="file-info">
           <i class="pi pi-file" />
           {{ logFile.path }} • {{ logFile.totalCount.toLocaleString() }} entries
