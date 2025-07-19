@@ -6,7 +6,7 @@ import Aura from "@primevue/themes/aura";
 import Tooltip from "primevue/tooltip";
 import "primeicons/primeicons.css";
 
-const LogcraftPreset = definePreset(Aura, {
+const TimberPreset = definePreset(Aura, {
   semantic: {
     primary: {
       50: "{orange.50}",
@@ -99,7 +99,7 @@ const LogcraftPreset = definePreset(Aura, {
 const app = createApp(App);
 app.use(PrimeVue, {
   theme: {
-    preset: LogcraftPreset,
+    preset: TimberPreset,
     options: {
       prefix: "p",
       darkModeSelector: ".dark-theme",
