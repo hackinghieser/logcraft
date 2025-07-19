@@ -1,10 +1,9 @@
-name: Build Tauri App
+name: Release Build
 
 on:
   push:
-    branches: [ "main", "feat/*" ]
-  pull_request:
-    branches: [ "main" ]
+    tags:
+      - 'v*'
 
 env:
   CARGO_TERM_COLOR: always
