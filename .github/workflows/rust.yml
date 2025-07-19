@@ -61,8 +61,32 @@ jobs:
         uses: tauri-apps/tauri-action@v0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # Disable code signing for unsigned builds
+          APPLE_SIGNING_IDENTITY: "-"
         with:
           args: ${{ matrix.args }}
+
+      - name: Create installation instructions (macOS only)
+        if: matrix.platform == 'macos-latest'
+        run: |
+          cat > INSTALL_INSTRUCTIONS.txt << 'EOF'
+          TIMBER - macOS Installation Instructions
+          =======================================
+          
+          This is an UNSIGNED build. To install on macOS:
+          
+          1. Download and open the .dmg file
+          2. Drag Timber to Applications folder
+          3. Right-click Timber in Applications and select "Open"
+          4. Click "Open" when macOS warns about unsigned developer
+          
+          Alternative method:
+          1. In System Settings > Privacy & Security
+          2. Click "Open Anyway" for Timber if blocked
+          
+          Target: ${{ matrix.target }}
+          Build Date: $(date)
+          EOF
 
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
@@ -71,5 +95,6 @@ jobs:
           path: |
             src-tauri/target/${{ matrix.target }}/release/bundle/
             src-tauri/target/release/bundle/
+            INSTALL_INSTRUCTIONS.txt
           if-no-files-found: warn
           retention-days: 30
